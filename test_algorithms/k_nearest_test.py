@@ -7,16 +7,19 @@ from util.file_downloader import FileDownloader
 class KNearestTest():
     output_path = "./input/k-neirest-neightbour.csv"
 
+    download_url = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-ML0101EN-SkillsNetwork/labs/Module%203/data/teleCust1000t.csv"
+
     def __init__(self):
         pass
 
     @staticmethod
     def do_download():
         downloader = FileDownloader()
-        downloader.download(KNearestNeighbour.path, KNearestTest.output_path)
+        downloader.download(KNearestTest.download_url, KNearestTest.output_path)
         k_nearest = KNearestNeighbour()
         df = k_nearest.load_data(KNearestTest.output_path)
         return k_nearest,df
+
     @staticmethod
     def split_datasets(k_nearest,df):
         X = k_nearest.get_X_axis(df,
