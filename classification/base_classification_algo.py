@@ -1,7 +1,12 @@
+import numpy as np
 import pandas as pd
 from sklearn import preprocessing, metrics
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import jaccard_score
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import log_loss
 
+import matplotlib.pyplot as plt
 
 class BaseClasifficationAlgo():
 
@@ -38,6 +43,23 @@ class BaseClasifficationAlgo():
 
     def calculate_accuracy(self,y_test,y_pred):
         return metrics.accuracy_score(y_test, y_pred)
+
+
+    def jaccard_index(self,y_test,y_pred,pos_label=0):
+        return jaccard_score(y_test, y_pred, pos_label=pos_label)
+
+    def get_confussion_matrix(self,y_test,y_pred,labels=[1,0],precision=2):
+        cnf_matrix = confusion_matrix(y_test, y_pred, labels=labels)
+        np.set_printoptions(precision=precision)
+
+        # Plot non-normalized confusion matrix
+        return  cnf_matrix
+
+    def log_loss(self,y_test,y_pred):
+        #Weakness of the probabilistic estimation
+        #Average of allt he probabilistic estimations weakness
+        #Ex; a prob of 0.6, is 0.6 from 0 and 0.4 away from 1.--> Weak prediction
+        return log_loss(y_test, y_pred)
 
 
     #endregion
