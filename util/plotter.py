@@ -18,6 +18,7 @@ class Plotter():
             """
 
         plt.figure()
+        np.set_printoptions(precision=2)
 
         if normalize:
             cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
