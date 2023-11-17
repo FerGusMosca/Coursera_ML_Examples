@@ -2,7 +2,7 @@ import numpy as np
 
 from classification.support_vector_machine import SupportVectorMachine
 from util.file_downloader import FileDownloader
-import matplotlib.pyplot as plt
+
 
 from util.plotter import Plotter
 

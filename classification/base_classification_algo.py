@@ -7,7 +7,10 @@ from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.metrics import log_loss
 from sklearn.metrics import f1_score
 
-class BaseClasifficationAlgo():
+from Common.BaseAlgo import BaseAlgo
+
+
+class BaseClasifficationAlgo(BaseAlgo):
 
     def __init__(self):
         pass
@@ -15,11 +18,7 @@ class BaseClasifficationAlgo():
 
     #region Public Methods
 
-    def load_data(self, path):
-        df = pd.read_csv(path)#panda datasets
-        df.head()
-        print("Succesfully loaded {}".format(path))
-        return df
+
 
     #Extracts all the columns from the df array
     def get_X_axis(self, df, indep_cols):

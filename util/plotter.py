@@ -1,11 +1,36 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import itertools
+from mpl_toolkits.mplot3d import Axes3D
 
 class Plotter():
 
     def __init__(self):
         pass
+
+    @staticmethod
+    def plot_scatter_plot(X,Y,area,labels,X_legend='X',Y_legend='Y',alpha=0.5):
+
+        plt.scatter(X, Y, s=area, c=labels.astype(float), alpha=alpha)
+        plt.xlabel(X_legend, fontsize=18)
+        plt.ylabel(Y_legend, fontsize=16)
+
+        plt.show()
+
+
+    @staticmethod
+    def scatter_3D(X,Y,Z,labels,X_legend='X',Y_legend='Y',Z_legend='Z',alpha=0.5):
+        fig = plt.figure(1, figsize=(8, 6))
+        plt.clf()
+        ax = Axes3D(fig, rect=(0, 0, .95, 1), elev=48, azim=134)
+
+        plt.cla()
+
+        ax.set_xlabel(X_legend)
+        ax.set_ylabel(Y_legend)
+        ax.set_zlabel(Z_legend)
+
+        ax.scatter(X, Y, Z, c=labels.astype(float))
 
     @staticmethod
     def plot_confussion_matrix(cm, classes,

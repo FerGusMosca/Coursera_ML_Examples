@@ -20,11 +20,6 @@ class KNearestNeighbour(BaseClasifficationAlgo):
 
 
 
-
-    def normalize(self,X_train):
-        X_train_norm = preprocessing.StandardScaler().fit(X_train).transform(X_train.astype(float))
-        return X_train_norm
-
     def train_model(self,X_train_norm,y_train,k):
         # Train Model and Predict
         neigh = KNeighborsClassifier(n_neighbors=k).fit(X_train_norm, y_train)

@@ -7,6 +7,7 @@ from pip._vendor.distlib.compat import raw_input
 from classification.decission_tree import DecissionTree
 from classification.k_nearest_neighbour import KNearestNeighbour
 from test_algorithms.decission_tree_test import DecissionTreeTest
+from test_algorithms.k_means_test import KMeansTest
 from test_algorithms.k_nearest_test import KNearestTest
 from test_algorithms.logistic_regression_test import LogisticRegressionTest
 from test_algorithms.support_vector_machine_test import SupportVectorMachineTest
@@ -37,13 +38,18 @@ def support_vector_machine_test():
     SupportVectorMachineTest.test()
 
 
+def k_means_test():
+    KMeansTest.test()
+    #KMeansTest.draw_random_data()
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
     #k_nearest_tests()
     #decission_tree_tests()
     #logistic_regression_test()
-    support_vector_machine_test()
+    #support_vector_machine_test()
+    k_means_test()
 
     raw_input("Press Enter to continue...")
 
