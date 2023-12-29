@@ -7,6 +7,7 @@ from pip._vendor.distlib.compat import raw_input
 from classification.decission_tree import DecissionTree
 from classification.k_nearest_neighbour import KNearestNeighbour
 from exams.module_7_final_exam import Module7Exam
+from exams.module_8_final_exam import Module8Exam
 from test_algorithms.decission_tree_test import DecissionTreeTest
 from test_algorithms.k_means_test import KMeansTest
 from test_algorithms.k_nearest_test import KNearestTest
@@ -57,7 +58,22 @@ def module7_test():
     #exam.q7_fit_multilinear_regr_model(df)
     #exam.q8_pipeline_evaluation(df)
     #exam.q9_ridge_eval_model(df)
-    exam.q10_ridge_w_plynomial_transform(df)
+    #exam.q10_ridge_w_plynomial_transform(df)
+
+
+def module8_test():
+    exam = Module8Exam()
+    #exam.task_1_1_create_sales_x_year_lineplot()
+    #exam.task_1_2_sales_per_vehicle_type_lineplot()
+    #exam.task_1_3_sales_recession_no_recession_lineplot()
+    #exam.task_1_3_v2_sales_per_vehicle_type()
+    #exam.task_1_4_sales_per_vehicle_type()
+    #exam.task_1_5_sales_seasonality()
+    #exam.task_1_6_consumer_conf_to_sales()
+    #exam.task_1_6_avg_px_sales_volume()
+    #exam.task_1_7_recession_non_recession_advertising()
+    #exam.task_1_8_adv_expenditures_during_recessioln()
+    exam.task_1_9_unempl_and_vehicle_type_sales()
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -67,7 +83,8 @@ if __name__ == '__main__':
     #logistic_regression_test()
     #support_vector_machine_test()
     #k_means_test()
-    module7_test()
+    #module7_test()
+    module8_test()
 
     raw_input("Press Enter to continue...")
 
