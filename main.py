@@ -6,6 +6,7 @@ from pip._vendor.distlib.compat import raw_input
 
 from classification.decission_tree import DecissionTree
 from classification.k_nearest_neighbour import KNearestNeighbour
+from exams.exam_8_dashboard import Module8Dashboard
 from exams.module_7_final_exam import Module7Exam
 from exams.module_8_final_exam import Module8Exam
 from test_algorithms.decission_tree_test import DecissionTreeTest
@@ -62,7 +63,7 @@ def module7_test():
 
 
 def module8_test():
-    exam = Module8Exam()
+    exam = Module8Dashboard()
     #exam.task_1_1_create_sales_x_year_lineplot()
     #exam.task_1_2_sales_per_vehicle_type_lineplot()
     #exam.task_1_3_sales_recession_no_recession_lineplot()
@@ -73,7 +74,8 @@ def module8_test():
     #exam.task_1_6_avg_px_sales_volume()
     #exam.task_1_7_recession_non_recession_advertising()
     #exam.task_1_8_adv_expenditures_during_recessioln()
-    exam.task_1_9_unempl_and_vehicle_type_sales()
+    #exam.task_1_9_unempl_and_vehicle_type_sales()
+    exam.init_dashboard()
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
