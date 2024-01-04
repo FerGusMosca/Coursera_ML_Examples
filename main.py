@@ -9,6 +9,7 @@ from classification.k_nearest_neighbour import KNearestNeighbour
 from exams.exam_8_dashboard import Module8Dashboard
 from exams.module_7_final_exam import Module7Exam
 from exams.module_8_final_exam import Module8Exam
+from excercises.course_10_space_Y_data_collection_test import Course10SpaceYDataCollectionTest
 from test_algorithms.decission_tree_test import DecissionTreeTest
 from test_algorithms.k_means_test import KMeansTest
 from test_algorithms.k_nearest_test import KNearestTest
@@ -75,7 +76,11 @@ def module8_test():
     #exam.task_1_7_recession_non_recession_advertising()
     #exam.task_1_8_adv_expenditures_during_recessioln()
     #exam.task_1_9_unempl_and_vehicle_type_sales()
-    exam.init_dashboard()
+    #exam.init_dashboard()
+
+def course_10_week_1_practice():
+    app = Course10SpaceYDataCollectionTest()
+    app.week_1_test()
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -86,7 +91,8 @@ if __name__ == '__main__':
     #support_vector_machine_test()
     #k_means_test()
     #module7_test()
-    module8_test()
+    #module8_test()
+    course_10_week_1_practice()
 
     raw_input("Press Enter to continue...")
 
