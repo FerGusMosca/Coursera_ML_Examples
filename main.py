@@ -9,7 +9,9 @@ from classification.k_nearest_neighbour import KNearestNeighbour
 from exams.exam_8_dashboard import Module8Dashboard
 from exams.module_7_final_exam import Module7Exam
 from exams.module_8_final_exam import Module8Exam
+from excercises.course10_space_Y_data_visualization import Course10SpaceYDataVisualization
 from excercises.course_10_space_Y_data_collection_test import Course10SpaceYDataCollectionTest
+from excercises.course_10_space_Y_data_wrangling import Course10SpaceYDataWranglingTest
 from test_algorithms.decission_tree_test import DecissionTreeTest
 from test_algorithms.k_means_test import KMeansTest
 from test_algorithms.k_nearest_test import KNearestTest
@@ -79,8 +81,14 @@ def module8_test():
     #exam.init_dashboard()
 
 def course_10_week_1_practice():
-    app = Course10SpaceYDataCollectionTest()
-    app.week_1_test()
+    #app = Course10SpaceYDataCollectionTest()
+    #app.week_1_test()
+
+    #app=Course10SpaceYDataWranglingTest()
+    #app.data_wrangling_test()
+
+    app=Course10SpaceYDataVisualization()
+    app.download_and_display()
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
