@@ -25,18 +25,25 @@ class BaseClasifficationAlgo(BaseAlgo):
         X = df[indep_cols].values
         return X
 
-    def get_X_axis_as_arr(self,cell_df,cols):
-        feature_df = cell_df[cols]
+    def get_X_axis_as_arr(self,cell_df,cols=None):
+
+        if cols is not None:
+            feature_df = cell_df[cols]
+        else:
+            feature_df=cell_df
         X = np.asarray(feature_df)
         return X
+
 
     #Same w/Y axis
     def get_Y_axis(self, df, dep_cols):
         Y = df[dep_cols].values
         return Y
 
-    def get_Y_axis_as_arr(self, cell_df, col,type):
-        cell_df[col] = cell_df[col].astype(type)
+    def get_Y_axis_as_arr(self, cell_df, col=None,type=None):
+        if col is not None:
+            cell_df[col] = cell_df[col].astype(type)
+
         y = np.asarray(cell_df[col])
         return y
 

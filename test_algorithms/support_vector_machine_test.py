@@ -16,6 +16,11 @@ class SupportVectorMachineTest():
         pass
 
     @staticmethod
+    def initialize():
+        svm = SupportVectorMachine()
+        return svm
+
+    @staticmethod
     def do_download():
         downloader = FileDownloader()
         downloader.download(SupportVectorMachineTest.download_url, SupportVectorMachineTest.output_path)
@@ -42,7 +47,8 @@ class SupportVectorMachineTest():
 
         #svm.plot_classification(cell_df,"Clump","UnifSize","Class","malignant","benign",max_samples=50)
 
-        cell_df=svm.clean_dataset(cell_df,"BareNuc","int")
+        #1- Do I need to convert SVM columns to numeric values?
+        #cell_df=svm.clean_dataset(cell_df,"BareNuc","int")
 
         X_train, X_test, y_train, y_test = SupportVectorMachineTest.split_datasets(svm,cell_df)
 

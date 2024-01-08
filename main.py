@@ -10,6 +10,7 @@ from exams.exam_8_dashboard import Module8Dashboard
 from exams.module_7_final_exam import Module7Exam
 from exams.module_8_final_exam import Module8Exam
 from excercises.course10_space_Y_data_visualization import Course10SpaceYDataVisualization
+from excercises.course10_space_y_machine_learning_algorithms_comparisson import Course10SpaceYMachineLearningPrediction
 from excercises.course_10_space_Y_data_collection_test import Course10SpaceYDataCollectionTest
 from excercises.course_10_space_Y_data_wrangling import Course10SpaceYDataWranglingTest
 from test_algorithms.decission_tree_test import DecissionTreeTest
@@ -87,8 +88,12 @@ def course_10_week_1_practice():
     #app=Course10SpaceYDataWranglingTest()
     #app.data_wrangling_test()
 
-    app=Course10SpaceYDataVisualization()
-    app.download_and_display()
+    #app=Course10SpaceYDataVisualization()
+    #app.download_and_display()
+
+    app=Course10SpaceYMachineLearningPrediction()
+    app.download_data_frames()
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
