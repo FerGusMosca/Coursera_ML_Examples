@@ -6,6 +6,7 @@ from pip._vendor.distlib.compat import raw_input
 
 from classification.decission_tree import DecissionTree
 from classification.k_nearest_neighbour import KNearestNeighbour
+from exams.exam10_presentation_calculations import Exam10PresentationCalculations
 from exams.exam_8_dashboard import Module8Dashboard
 from exams.module_7_final_exam import Module7Exam
 from exams.module_8_final_exam import Module8Exam
@@ -79,11 +80,11 @@ def module8_test():
     #exam.task_1_7_recession_non_recession_advertising()
     #exam.task_1_8_adv_expenditures_during_recessioln()
     #exam.task_1_9_unempl_and_vehicle_type_sales()
-    #exam.init_dashboard()
+    exam.init_dashboard()
 
 def course_10_week_1_practice():
-    #app = Course10SpaceYDataCollectionTest()
-    #app.week_1_test()
+    app = Course10SpaceYDataCollectionTest()
+    app.week_1_test()
 
     #app=Course10SpaceYDataWranglingTest()
     #app.data_wrangling_test()
@@ -91,8 +92,18 @@ def course_10_week_1_practice():
     #app=Course10SpaceYDataVisualization()
     #app.download_and_display()
 
-    app=Course10SpaceYMachineLearningPrediction()
-    app.download_data_frames()
+    #app=Course10SpaceYMachineLearningPrediction()
+    #app.download_data_frames()
+    pass
+def exam_10_presentation_calculations():
+    app=Exam10PresentationCalculations()
+    #app.save_launches_to_csv()
+    #app.slide_25_flight_number_vs_launch_site()
+    #app.slide_26_payload_vs_launch_site()
+    #app.slide_27_orbit_vs_success()
+    #app.slide_28_flight_number_vs_orbit_type()
+    #app.slide_30_payload_vs_orbit_type()
+    app.slide_32_launch_success_by_year()
 
 
 # Press the green button in the gutter to run the script.
@@ -105,8 +116,8 @@ if __name__ == '__main__':
     #k_means_test()
     #module7_test()
     #module8_test()
-    course_10_week_1_practice()
-
+    #course_10_week_1_practice()
+    exam_10_presentation_calculations()
     raw_input("Press Enter to continue...")
 
 

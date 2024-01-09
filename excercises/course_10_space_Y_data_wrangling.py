@@ -28,7 +28,7 @@ class Course10SpaceYDataWranglingTest:
         print("GTO Orbits!:{}".format(orbit_counts_df[orbit_counts_df["Orbit"] == "GTO"]["Flights"].values[0]))
 
         #4-How many landing outcomes in the column landing_outcomes had  a value of none
-        none_outcomes=len(df["Outcome"].isnull())
+        none_outcomes=len(df[df["Outcome"].isnull()==True])
         print("None Outcomes:{}".format(none_outcomes))
 
         pass

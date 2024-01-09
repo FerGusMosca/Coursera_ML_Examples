@@ -78,7 +78,7 @@ class Course10SpaceYMachineLearningPrediction:
         print("Logistic Regression - Training Params Accuracy :", logreg_cv.best_score_)
 
         #TASK 5 - Accuracy of test data versus predictions + conf. matrix of predictions
-        #yhat = logreg_cv.predict(X_test)
+        yhat = logreg_cv.predict(X_test)
         #self.plot_confusion_matrix(y_test, yhat)
         lr_accuracy = logreg_cv.score(X_test, y_test)
         print("Logistic Regression - Test Accuracy Score :{}".format(lr_accuracy))
