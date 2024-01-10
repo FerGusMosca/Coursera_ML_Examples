@@ -83,11 +83,11 @@ def module8_test():
     exam.init_dashboard()
 
 def course_10_week_1_practice():
-    app = Course10SpaceYDataCollectionTest()
-    app.week_1_test()
+    #app = Course10SpaceYDataCollectionTest()
+    #app.week_1_test()
 
-    #app=Course10SpaceYDataWranglingTest()
-    #app.data_wrangling_test()
+    app=Course10SpaceYDataWranglingTest()
+    app.data_wrangling_test()
 
     #app=Course10SpaceYDataVisualization()
     #app.download_and_display()
@@ -103,8 +103,17 @@ def exam_10_presentation_calculations():
     #app.slide_27_orbit_vs_success()
     #app.slide_28_flight_number_vs_orbit_type()
     #app.slide_30_payload_vs_orbit_type()
-    app.slide_32_launch_success_by_year()
-
+    #app.slide_32_launch_success_by_year()
+    #app.slide_34_all_launch_site_names()
+    #app.slide_35_filter_launch_sites()
+    #app.slide_36_total_payload_mass()
+    #app.slide_37_avg_payload_mass_by_f9_v1_1()
+    #app.slide_38_first_succesful_ground_landing()
+    #app.slide_39_succesfull_landing_with_specific_payload()
+    #app.slide_40_succesful_vs_failed_landings()
+    #app.slide_41_boost_w_payload_mas()
+    #app.slide_42_failed_launches_for_2015()
+    app.slide_43_rank_landing_outcomes()
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
