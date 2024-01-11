@@ -10,6 +10,7 @@ from exams.exam10_presentation_calculations import Exam10PresentationCalculation
 from exams.exam_8_dashboard import Module8Dashboard
 from exams.module_7_final_exam import Module7Exam
 from exams.module_8_final_exam import Module8Exam
+from excercises.course10_space_Y_dashboard import Course10SpaceYDashboard
 from excercises.course10_space_Y_data_visualization import Course10SpaceYDataVisualization
 from excercises.course10_space_y_machine_learning_algorithms_comparisson import Course10SpaceYMachineLearningPrediction
 from excercises.course_10_space_Y_data_collection_test import Course10SpaceYDataCollectionTest
@@ -81,16 +82,20 @@ def module8_test():
     #exam.task_1_8_adv_expenditures_during_recessioln()
     #exam.task_1_9_unempl_and_vehicle_type_sales()
     exam.init_dashboard()
+    pass
 
 def course_10_week_1_practice():
     #app = Course10SpaceYDataCollectionTest()
     #app.week_1_test()
 
-    app=Course10SpaceYDataWranglingTest()
-    app.data_wrangling_test()
+    #app=Course10SpaceYDataWranglingTest()
+    #app.data_wrangling_test()
 
     #app=Course10SpaceYDataVisualization()
     #app.download_and_display()
+
+    app=Course10SpaceYDashboard()
+    app.init_dashboard()
 
     #app=Course10SpaceYMachineLearningPrediction()
     #app.download_data_frames()
@@ -125,8 +130,8 @@ if __name__ == '__main__':
     #k_means_test()
     #module7_test()
     #module8_test()
-    #course_10_week_1_practice()
-    exam_10_presentation_calculations()
+    course_10_week_1_practice()
+    #exam_10_presentation_calculations()
     raw_input("Press Enter to continue...")
 
 

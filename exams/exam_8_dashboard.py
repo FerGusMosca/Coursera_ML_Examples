@@ -19,7 +19,7 @@ class Module8Dashboard:
 
         year_list = [i for i in range(1980, 2024, 1)]
 
-        app=dash.Dash(title="Automobile Sales Statistics Dashboard")
+        app=dash.Dash(title="Automobile Sales Statistics Dashboard" , suppress_callback_exceptions=True)
         app.layout = html.Div([
             html.H1("My Automobile Sales Statistics Dashboard",style={"textAlign": "center", "color": "#503D36", "font-size": 24}),
             dcc.Dropdown(id='dropdown-statistics',

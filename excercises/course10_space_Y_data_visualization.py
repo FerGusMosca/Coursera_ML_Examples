@@ -10,6 +10,7 @@ from folium.plugins import MarkerCluster
 from folium.plugins import MousePosition
 # Import folium DivIcon plugin
 from folium.features import DivIcon
+from math import sin, cos, sqrt, atan2, radians
 
 class Course10SpaceYDataVisualization:
     _CSV_PATH = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DS0321EN-SkillsNetwork/datasets/spacex_launch_geo.csv'
@@ -61,15 +62,36 @@ class Course10SpaceYDataVisualization:
 
         return  mouse_position
 
+    def calculate_distance(self,lat1, lon1, lat2, lon2):
+        # approximate radius of earth in km
+        R = 6373.0
+
+        lat1 = radians(lat1)
+        lon1 = radians(lon1)
+        lat2 = radians(lat2)
+        lon2 = radians(lon2)
+
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+
+        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        distance = R * c
+        return distance
+
 
 
     def show_launch_sites(self,launch_sites_df,launches_df):
         nasa_coordinate = [29.559684888503615, -95.0830971930759]
         site_map = folium.Map(location=nasa_coordinate, zoom_start=10)
 
+        launch_site_coordinates=[]
+
         for index, row in launch_sites_df.iterrows():
 
             launch_site_coord=[row["Lat"],row["Long"]]
+            launch_site_coordinates.append(launch_site_coord)
             circle = folium.Circle(launch_site_coord, radius=1000, color='#d35400', fill=True).add_child(
                 folium.Popup(row["Launch Site"]))
             site_map.add_child(circle)
@@ -88,10 +110,36 @@ class Course10SpaceYDataVisualization:
             marker_cluster.add_child(new_marker)
 
 
+        #- We draw a line to the nearest road
+        road_coordinates = [28.55736, -80.58832]
+        dist = self.calculate_distance(road_coordinates[0], road_coordinates[1], launch_site_coordinates[0][0],
+                                       launch_site_coordinates[0][1])
+
+
+        distance_marker = folium.Marker(
+           road_coordinates,
+           icon=DivIcon(
+               icon_size=(20,20),
+               icon_anchor=(0,0),
+               html='<div style="font-size: 12; color:#d35400;"><b>%s</b></div>' % "{:10.2f} KM".format(dist),
+               )
+           )
+
+        line_coordinates = [
+            road_coordinates,  # Road
+            launch_site_coordinates[0]
+        ]
+
+
+        lines = folium.PolyLine(locations=line_coordinates, weight=1)
+        site_map.add_child(lines)
+
         mouse_pos=self.get_mouse_position()
 
         site_map.add_child(mouse_pos)
         site_map.add_child(marker_cluster)
+        site_map.add_child(distance_marker)
+
         site_map.show_in_browser()
 
 
