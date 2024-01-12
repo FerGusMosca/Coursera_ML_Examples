@@ -49,8 +49,8 @@ class Course10SpaceYDashboard:
             dcc.RangeSlider(id='payload-slider',
                             min=0,max=10000,step=1000,marks={0: '0',100: '100'},
                             value=[0, 10000]),
-
             html.Div(id='success-pie-chart', className="chart-grid", style={'display': 'flex'}),
+            html.Div(id='success-payload-scatter-chart', className="chart-grid", style={'display': 'flex'}),
             #html.Div(id='dd-output-container')
         ])
 
@@ -91,6 +91,24 @@ class Course10SpaceYDashboard:
         return summary_df
 
 
+    @staticmethod
+    def get_success_by_payload(df_launches,launch_site=None):
+
+        df_launches=df_launches[(df_launches["LaunchSite"]==launch_site)| (launch_site is None)]
+
+        succesful_landings_df = df_launches[(df_launches["Outcome"] == "True Ocean")
+                                            | (df_launches["Outcome"] == "True RTLS")
+                                            | (df_launches["Outcome"] == "True ASDS")][["PayloadMass","BoosterVersion"]]
+        succesful_landings_df["Status"]="Success"
+
+        unsuccesful_landings_df = df_launches[(df_launches["Outcome"] != "True Ocean")
+                                            & (df_launches["Outcome"] != "True RTLS")
+                                            & (df_launches["Outcome"] != "True ASDS")][["PayloadMass","BoosterVersion"]]
+        unsuccesful_landings_df["Status"] = "Failure"
+        summary_df=pd.concat([succesful_landings_df, unsuccesful_landings_df])
+        return summary_df
+
+
     # Function decorator to specify function input and output
     @callback(Output(component_id='success-pie-chart', component_property='children'),
               Input(component_id='site_id', component_property='value'))
@@ -117,3 +135,34 @@ class Course10SpaceYDashboard:
                               title=title))
             return R_chart
     # return the outcomes piechart for a selected site
+
+    # Function decorator to specify function input and output
+    @callback(Output(component_id='success-payload-scatter-chart', component_property='children'),
+              [Input(component_id='site_id', component_property='value'),
+               Input(component_id="payload-slider", component_property="value")]
+              )
+    def success_payload_scatter_chart(site,slider_val):
+
+        launches_df = pd.read_csv("{}space_x_launches.csv".format(Exam10PresentationCalculations._INPUT_FOLDER))
+        success_by_payload_df=None
+        min_val = slider_val[0]
+        max_val = slider_val[1]
+        if site == 'ALL':
+            launches_df=launches_df[(launches_df["PayloadMass"]>=min_val) & (launches_df["PayloadMass"]<=max_val)]
+            title = "Outcome by Payload Mass (All Sites)"
+            success_by_payload_df=Course10SpaceYDashboard.get_success_by_payload(launches_df)
+
+
+        else:
+            launches_df = launches_df[(launches_df["PayloadMass"] >= min_val) & (launches_df["PayloadMass"] <= max_val)]
+            title = "Outcome by Payload Mass for {}".format(site)
+
+            success_by_payload_df = Course10SpaceYDashboard.get_success_by_payload(launches_df,site)
+
+        R_chart2 = dcc.Graph(
+            figure=px.scatter(success_by_payload_df,
+                              x='PayloadMass',
+                              y='Status',
+                              color="BoosterVersion",
+                              title=title))
+        return R_chart2
