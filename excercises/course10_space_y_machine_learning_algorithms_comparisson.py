@@ -21,8 +21,11 @@ from sklearn.tree import DecisionTreeClassifier
 # K Nearest Neighbors classification algorithm
 from sklearn.neighbors import KNeighborsClassifier
 
+from exams.exam10_presentation_calculations import Exam10PresentationCalculations
+from service_layer.launches_service_client import LaunchesServiceClient
 from test_algorithms.support_vector_machine_test import SupportVectorMachineTest
-
+import plotly.express as px
+import pandas as pd
 
 class Course10SpaceYMachineLearningPrediction:
     _CSV_PATH = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-DS0321EN-SkillsNetwork/datasets/dataset_part_2.csv'
@@ -46,9 +49,20 @@ class Course10SpaceYMachineLearningPrediction:
         ax.yaxis.set_ticklabels(['did not land', 'landed'])
         plt.show()
 
+    def visualize_model_comparisson(self,comparisson_df):
+        sns.barplot(x='Model', y='Accuracy', data=comparisson_df)
 
-    def download_data_frames(self):
+        plt.xlabel('Model')
+        plt.ylabel('Accuracy')
+        plt.title('Accuracy of the different models')
+
+        plt.show()
+
+
+    def compare_ML_algorithms(self):
         df_1 = pd.read_csv(Course10SpaceYMachineLearningPrediction._CSV_PATH)
+
+        comparisson_df = pd.DataFrame(columns=['Model', 'Accuracy'])
 
         #df_2 = pd.read_csv(Course10SpaceYMachineLearningPrediction._CSV_PATH_2)
 
@@ -77,6 +91,9 @@ class Course10SpaceYMachineLearningPrediction:
         print("tuned hpyerparameters :(best parameters) ", logreg_cv.best_params_)
         print("Logistic Regression - Training Params Accuracy :", logreg_cv.best_score_)
 
+        new_row = {'Model': 'Logistic Regression', 'Accuracy': logreg_cv.best_score_}
+        comparisson_df = comparisson_df.append(new_row, ignore_index=True)
+
         #TASK 5 - Accuracy of test data versus predictions + conf. matrix of predictions
         yhat = logreg_cv.predict(X_test)
         #self.plot_confusion_matrix(y_test, yhat)
@@ -91,13 +108,16 @@ class Course10SpaceYMachineLearningPrediction:
         svm_cv = GridSearchCV(svm , parameters)
         svm_cv.fit(X_train, y_train)
         print("tuned hpyerparameters :(best parameters) ", svm_cv.best_params_)
-        print("Support Vector Machine - Training Params Accuracy :", logreg_cv.best_score_)
+        print("Support Vector Machine - Training Params Accuracy :", svm_cv.best_score_)
+        new_row = {'Model': 'Support Vector Machine', 'Accuracy': svm_cv.best_score_}
+        comparisson_df = comparisson_df.append(new_row, ignore_index=True)
 
         #TASK 7- Calculate the accuracy on the test data using the method score
         svm_accuracy = svm_cv.score(X_test, y_test)
         print("Support Vector Machine - Test Accuracy Score :{}".format(svm_accuracy))
         #print("accuracy :", svm_cv.best_score_)
-        #self.plot_confusion_matrix(y_test, yhat)
+        yhat = logreg_cv.predict(X_test)
+        self.plot_confusion_matrix(y_test, yhat)
 
 
         #TASK 8 - Decission Tree Classifier
@@ -112,9 +132,11 @@ class Course10SpaceYMachineLearningPrediction:
         tree_cv = GridSearchCV(tree, parameters)
         tree_cv.fit(X_train, y_train)
         print("tuned hpyerparameters :(best parameters) ", tree_cv.best_params_)
-        print("Decission Tree - Training Params Accuracy :", tree_cv.best_score_)
+        print("Decision Tree - Training Params Accuracy :", tree_cv.best_score_)
         tree_accuracy = tree_cv.score(X_test, y_test)
-        print("Decission Tree - Test Accuracy Score :{}".format(tree_accuracy))
+        print("Decision Tree - Test Accuracy Score :{}".format(tree_accuracy))
+        new_row = {'Model': 'Decision Tree', 'Accuracy': tree_cv.best_score_}
+        comparisson_df = comparisson_df.append(new_row, ignore_index=True)
 
         #TASK 10 - K-nearest Neighbour
         parameters = {'n_neighbors': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -128,6 +150,73 @@ class Course10SpaceYMachineLearningPrediction:
         print("KNN - Training Params Accuracy :", knn_cv.best_score_)
         knn_accuracy = tree_cv.score(X_test, y_test)
         print("KNN - Test Accuracy Score :{}".format(knn_accuracy))
+        new_row = {'Model': 'K Nearest Neighbour', 'Accuracy': knn_cv.best_score_}
+        comparisson_df = comparisson_df.append(new_row, ignore_index=True)
 
+        self.visualize_model_comparisson(comparisson_df)
+        pass
+
+
+    def get_summmary_df_w_grid_fins_legss(self, launch_site=None, orbit=None):
+        df_1 = pd.read_csv("{}space_x_launches.csv".format(Exam10PresentationCalculations._INPUT_FOLDER))
+
+        if launch_site is not None:
+            df_1=df_1[df_1["LaunchSite"]==True]
+
+        if orbit is not None:
+            df_1=df_1[df_1["Orbit"]==True]
+
+        df_1 = df_1[df_1["GridFins"] == True]
+        df_1 = df_1[df_1["Legs"] == True]
+
+
+
+        success_df = df_1[(df_1["Outcome"] == "True Ocean")
+                          | (df_1["Outcome"] == "True RTLS")
+                          | (df_1["Outcome"] == "True ASDS")]
+        success_df["Status"] = "Success"
+
+        failed_df = df_1[(df_1["Outcome"] != "True Ocean")
+                         & (df_1["Outcome"] != "True RTLS")
+                         & (df_1["Outcome"] != "True ASDS")]
+        failed_df["Status"] = "Failure"
+
+        summary_df = pd.concat([success_df, failed_df])
+
+        return summary_df
+
+    def custom_calculations(self):
+
+        #client=LaunchesServiceClient()
+        #client.get_all_launches()
+
+        summary_df=self.get_summmary_df_w_grid_fins_legss()
+        #summary_df=summary_df.groupby("Status").count().reset_index().rename(columns={'FlightNumber': 'Count'})
+
+        #1- Show the real success rate
+        fig = px.pie(summary_df, names='Status', title='Mission Status Distribution',
+                     labels={'Status': 'Mission Status'},
+                     color_discrete_map={'Success': 'green', 'Failure': 'red'})
+
+        # Show plot
+        fig.show()
+
+        #2- Scatter bettwen Payload Mass and Orbit
+        fig = px.scatter(summary_df, x='PayloadMass', y='Orbit', color='Status',
+                         title='Payload Mass vs Orbit with Status',
+                         labels={'PayloadMass': 'Payload Mass', 'Orbit': 'Orbit Type'},
+                         color_discrete_map={'Success': 'blue', 'Failure': 'red'})
+
+        # Show plot
+        fig.show()
+
+        # 3- Scatter bettwen Payload Mass and LaunchSite
+        fig = px.scatter(summary_df, x='PayloadMass', y='LaunchSite', color='Status',
+                         title='Payload Mass vs LaunchSite with Status',
+                         labels={'PayloadMass': 'Payload Mass', 'LaunchSite': 'LaunchSite'},
+                         color_discrete_map={'Success': 'blue', 'Failure': 'red'})
+
+        # Show plot
+        fig.show()
 
         pass

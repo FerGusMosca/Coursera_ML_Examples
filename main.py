@@ -94,11 +94,15 @@ def course_10_week_1_practice():
     #app=Course10SpaceYDataVisualization()
     #app.download_and_display()
 
-    app=Course10SpaceYDashboard()
-    app.init_dashboard()
+    #app=Course10SpaceYDashboard()
+    #app.init_dashboard()
 
-    #app=Course10SpaceYMachineLearningPrediction()
-    #app.download_data_frames()
+    app=Course10SpaceYMachineLearningPrediction()
+    #app.compare_ML_algorithms()
+    app.custom_calculations()
+
+    #app = Exam10PresentationCalculations()
+    #app.save_launches_to_csv()
     pass
 def exam_10_presentation_calculations():
     app=Exam10PresentationCalculations()
