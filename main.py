@@ -7,6 +7,7 @@ from pip._vendor.distlib.compat import raw_input
 from classification.decission_tree import DecissionTree
 from classification.k_nearest_neighbour import KNearestNeighbour
 from exams.exam10_presentation_calculations import Exam10PresentationCalculations
+from exams.exam5_stocks_analysis import StocksAnalysisSummary
 from exams.exam_8_dashboard import Module8Dashboard
 from exams.module_7_final_exam import Module7Exam
 from exams.module_8_final_exam import Module8Exam
@@ -124,6 +125,12 @@ def exam_10_presentation_calculations():
     #app.slide_42_failed_launches_for_2015()
     app.slide_43_rank_landing_outcomes()
 
+
+def exam_5_stocks_analysis():
+    app=StocksAnalysisSummary()
+    #app.q1_extract_stock_price_w_yahoo()
+    app.q3_extract_stock_price_w_yahoo()
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
@@ -134,8 +141,9 @@ if __name__ == '__main__':
     #k_means_test()
     #module7_test()
     #module8_test()
-    course_10_week_1_practice()
+    #course_10_week_1_practice()
     #exam_10_presentation_calculations()
+    exam_5_stocks_analysis()
     raw_input("Press Enter to continue...")
 
 

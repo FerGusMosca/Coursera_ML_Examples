@@ -1,4 +1,4 @@
-from Common.BaseAlgo import BaseAlgo
+from common.BaseAlgo import BaseAlgo
 
 
 class BaseClusteringAlgo(BaseAlgo):

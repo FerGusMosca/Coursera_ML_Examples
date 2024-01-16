@@ -7,7 +7,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.metrics import log_loss
 from sklearn.metrics import f1_score
 
-from Common.BaseAlgo import BaseAlgo
+from common.BaseAlgo import BaseAlgo
 
 
 class BaseClasifficationAlgo(BaseAlgo):
