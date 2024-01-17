@@ -5,10 +5,13 @@ from data_access_layer.economic_series_manager import EconomicSeriesManager
 import pandas as pd
 
 from framework.common.logger.message_type import MessageType
+from logic_layer.ml_models_analyzer import MLModelAnalyzer
 
 
 class DataManagement:
     _1_DAY_INTERVAL="1 day"
+    _CLASSIFICATION_COL="classification"
+
     def __init__(self,hist_data_conn_str,ml_reports_conn_str,p_classification_map_key,logger):
         self.hist_data_conn_str=hist_data_conn_str
         self.ml_reports_conn_str=ml_reports_conn_str
@@ -79,7 +82,7 @@ class DataManagement:
 
             if not self.eval_all_values_none(curr_date_dict):
                 curr_date_dict["date"]=curr_date
-                curr_date_dict["classification"]=self.assign_classification(curr_date)
+                curr_date_dict[DataManagement._CLASSIFICATION_COL]=self.assign_classification(curr_date)
                 self.logger.do_log("Adding dataframe row for date {}".format(curr_date.date()),MessageType.INFO)
                 series_df=series_df.append(curr_date_dict, ignore_index=True)
 
@@ -94,24 +97,30 @@ class DataManagement:
 
     def build_dataframes(self,series_csv,d_from,d_to):
 
-        #TODO log///TryCatch
-        series_list=series_csv.split(",")
+        try:
+            series_list=series_csv.split(",")
 
-        series_data_dict={}
+            series_data_dict={}
 
-        for serieID in series_list:
-            economic_values=self.economic_series_mgr.get_economic_values(serieID,DataManagement._1_DAY_INTERVAL,d_from,d_to)
-            series_data_dict[serieID]=economic_values
+            for serieID in series_list:
+                economic_values=self.economic_series_mgr.get_economic_values(serieID,DataManagement._1_DAY_INTERVAL,d_from,d_to)
+                series_data_dict[serieID]=economic_values
 
 
-        min_date,max_date =self.get_extreme_dates(series_data_dict)
+            min_date,max_date =self.get_extreme_dates(series_data_dict)
 
-        series_df=self.build_empty_dataframe(series_data_dict)
+            series_df=self.build_empty_dataframe(series_data_dict)
 
-        self.load_classification_map_date_ranges()
+            self.load_classification_map_date_ranges()
 
-        self.fill_dataframe(series_df,min_date,max_date,series_data_dict)
-        pass
+            series_df=self.fill_dataframe(series_df,min_date,max_date,series_data_dict)
 
-        #TODO--> Take everything to a single dataframe!
-        #TODO --> Later --> the classification stuff
+            mlAnalyzer=MLModelAnalyzer(self.logger)
+            mlAnalyzer.run_evaluation(series_df,DataManagement._CLASSIFICATION_COL)
+
+        except Exception as e:
+            msg="CRITICAL ERROR processing model:".format(str(e))
+            self.logger.do_log(msg,MessageType.ERROR)
+            raise Exception(msg)
+
+

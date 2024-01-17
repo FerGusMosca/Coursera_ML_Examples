@@ -146,9 +146,9 @@ class Course10SpaceYMachineLearningPrediction:
         KNN = KNeighborsClassifier()
         knn_cv = GridSearchCV(KNN, parameters)
         knn_cv.fit(X_train, y_train)
-        print("tuned hpyerparameters :(best parameters) ", tree_cv.best_params_)
+        print("tuned hpyerparameters :(best parameters) ", knn_cv.best_params_)
         print("KNN - Training Params Accuracy :", knn_cv.best_score_)
-        knn_accuracy = tree_cv.score(X_test, y_test)
+        knn_accuracy = knn_cv.score(X_test, y_test)
         print("KNN - Test Accuracy Score :{}".format(knn_accuracy))
         new_row = {'Model': 'K Nearest Neighbour', 'Accuracy': knn_cv.best_score_}
         comparisson_df = comparisson_df.append(new_row, ignore_index=True)
