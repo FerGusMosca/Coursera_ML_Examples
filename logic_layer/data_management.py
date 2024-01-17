@@ -95,32 +95,50 @@ class DataManagement:
         self.classification_map_values=self.date_range_classification_mgr.get_date_range_classification_values(self.classification_map_key)
         pass
 
-    def build_dataframes(self,series_csv,d_from,d_to):
+    def build_series(self,series_csv,d_from,d_to):
+        series_list = series_csv.split(",")
+
+        series_data_dict = {}
+
+        for serieID in series_list:
+            economic_values = self.economic_series_mgr.get_economic_values(serieID, DataManagement._1_DAY_INTERVAL,
+                                                                           d_from, d_to)
+            series_data_dict[serieID] = economic_values
+
+        min_date, max_date = self.get_extreme_dates(series_data_dict)
+
+        series_df = self.build_empty_dataframe(series_data_dict)
+
+        self.load_classification_map_date_ranges()
+
+        series_df = self.fill_dataframe(series_df, min_date, max_date, series_data_dict)
+
+        return  series_df
+
+    def evaluate_algorithms_performance(self,series_csv,d_from,d_to):
 
         try:
-            series_list=series_csv.split(",")
-
-            series_data_dict={}
-
-            for serieID in series_list:
-                economic_values=self.economic_series_mgr.get_economic_values(serieID,DataManagement._1_DAY_INTERVAL,d_from,d_to)
-                series_data_dict[serieID]=economic_values
-
-
-            min_date,max_date =self.get_extreme_dates(series_data_dict)
-
-            series_df=self.build_empty_dataframe(series_data_dict)
-
-            self.load_classification_map_date_ranges()
-
-            series_df=self.fill_dataframe(series_df,min_date,max_date,series_data_dict)
-
+            series_df=self.build_series(series_csv,d_from,d_to)
             mlAnalyzer=MLModelAnalyzer(self.logger)
-            mlAnalyzer.run_evaluation(series_df,DataManagement._CLASSIFICATION_COL)
+            comp_df= mlAnalyzer.fit_and_evaluate(series_df, DataManagement._CLASSIFICATION_COL)
+            return comp_df
 
         except Exception as e:
-            msg="CRITICAL ERROR processing model:".format(str(e))
+            msg="CRITICAL ERROR processing model @evaluate_algorithms_performance:".format(str(e))
             self.logger.do_log(msg,MessageType.ERROR)
+            raise Exception(msg)
+
+    def evaluate_algorithms_performance_last_model(self,series_csv,d_from,d_to):
+
+        try:
+            series_df = self.build_series(series_csv, d_from, d_to)
+            mlAnalyzer = MLModelAnalyzer(self.logger)
+            comp_df = mlAnalyzer.fetch_and_evaluate(series_df, DataManagement._CLASSIFICATION_COL)
+            return comp_df
+
+        except Exception as e:
+            msg = "CRITICAL ERROR processing model @evaluate_algorithms_performance:".format(str(e))
+            self.logger.do_log(msg, MessageType.ERROR)
             raise Exception(msg)
 
 
