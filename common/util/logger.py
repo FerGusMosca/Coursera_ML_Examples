@@ -55,3 +55,7 @@ class Logger:
             self.logger.info(msg)
         if msg_type == MessageType.DEBUG:
             self.logger.debug(msg)
+
+    def do_log(self, msg, msg_type):
+        print(msg)
+        self.print(msg,msg_type)

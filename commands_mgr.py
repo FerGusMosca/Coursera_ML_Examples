@@ -24,7 +24,8 @@ def process_create_dataframes(cmd_param_list,str_from,str_to):
 
         config_settings=loader.load_settings("./configs/commands_mgr.ini")
 
-        dataMgm=DataManagement(config_settings["connection_string"],logger)
+        dataMgm= DataManagement(config_settings["hist_data_conn_str"],config_settings["ml_reports_conn_str"],
+                                config_settings["classification_map_key"], logger)
         dataMgm.build_dataframes(cmd_param_list,
                                  DateHandler.convert_str_date(str_from,_DATE_FORMAT),
                                  DateHandler.convert_str_date(str_to,_DATE_FORMAT))

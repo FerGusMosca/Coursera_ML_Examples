@@ -13,7 +13,9 @@ class SettingsLoader():
             config_settings={}
 
 
-            config_settings["connection_string"]= config['DB']['CONNECTION_STRING']
+            config_settings["hist_data_conn_str"]= config['DB']['HIST_DATA_CONN_STR']
+            config_settings["ml_reports_conn_str"] = config['DB']['ML_REPORTS_CONN_STR']
+            config_settings["classification_map_key"] = config['SETTINGS']['CLASSIFICATION_MAP_KEY']
 
 
             return  config_settings
