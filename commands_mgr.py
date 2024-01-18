@@ -3,7 +3,8 @@ from common.util.logger import Logger
 from common.util.settings_loader import SettingsLoader
 from framework.common.logger.message_type import MessageType
 from logic_layer.data_management import DataManagement
-
+from IPython.display import display
+import pandas as pd
 _DATE_FORMAT="%m/%d/%Y"
 
 def show_commands():
@@ -28,7 +29,7 @@ def process_evaluate_algos(cmd_param_list,str_from,str_to):
                                 config_settings["classification_map_key"], logger)
         dataMgm.evaluate_algorithms_performance(cmd_param_list, DateHandler.convert_str_date(str_from, _DATE_FORMAT),
                                                 DateHandler.convert_str_date(str_to, _DATE_FORMAT))
-        #TODO print ouput result
+
     except Exception as e:
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)),MessageType.ERROR)
 
@@ -43,12 +44,38 @@ def process_evaluate_algos_last_model(cmd_param_list,str_from,str_to):
 
         dataMgm= DataManagement(config_settings["hist_data_conn_str"],config_settings["ml_reports_conn_str"],
                                 config_settings["classification_map_key"], logger)
-        dataMgm.evaluate_algorithms_performance_last_model(cmd_param_list, DateHandler.convert_str_date(str_from, _DATE_FORMAT),
+        comp_df=dataMgm.evaluate_algorithms_performance_last_model(cmd_param_list, DateHandler.convert_str_date(str_from, _DATE_FORMAT),
                                                 DateHandler.convert_str_date(str_to, _DATE_FORMAT))
-        #TODO print ouput result
+        print("Displaying all the different models performance:")
+        display(comp_df)
     except Exception as e:
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)),MessageType.ERROR)
 
+
+def process_run_preductions_last_model(cmd_param_list,str_from,str_to):
+    loader = SettingsLoader()
+    logger = Logger()
+    try:
+        logger.print("Running predictions fro last model from {} to {}".format(str_from,str_to), MessageType.INFO)
+
+        config_settings = loader.load_settings("./configs/commands_mgr.ini")
+
+        dataMgm = DataManagement(config_settings["hist_data_conn_str"], config_settings["ml_reports_conn_str"],
+                                 config_settings["classification_map_key"], logger)
+        pred_dict=dataMgm.run_predictions_last_model(cmd_param_list,
+                                                           DateHandler.convert_str_date(str_from, _DATE_FORMAT),
+                                                           DateHandler.convert_str_date(str_to, _DATE_FORMAT))
+        print("Displaying all the different models predictions for the different alogs:")
+        pd.set_option('display.max_rows', None)
+        for key in pred_dict.keys():
+            print("============{}============".format(key))
+            display(pred_dict[key])
+            print("")
+            print("")
+        pd.reset_option('display.max_rows')
+
+    except Exception as e:
+        logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
 
 
 
@@ -63,7 +90,10 @@ def process_commands(cmd):
     elif cmd_param_list[0]=="EvaluateAlgosLastModel":
         params_validation("EvaluateAlgosLastModel", cmd_param_list, 4)
         process_evaluate_algos_last_model(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3])
-        #
+    elif cmd_param_list[0]=="RunPredictionsLastModel":
+        params_validation("RunPredictionsLastModel", cmd_param_list, 4)
+        process_run_preductions_last_model( cmd_param_list[1], cmd_param_list[2], cmd_param_list[3])
+
     else:
         print("Not recognized command {}".format(cmd_param_list[0]))
 

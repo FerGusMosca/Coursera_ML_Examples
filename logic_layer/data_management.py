@@ -68,7 +68,7 @@ class DataManagement:
 
 
 
-    def fill_dataframe(self,series_df,min_date,max_date,series_data_dict):
+    def fill_dataframe(self,series_df,min_date,max_date,series_data_dict,add_classif_col=True):
         curr_date=min_date
         self.logger.do_log("Building the input dataframe from {} to {}".format(min_date.date(),max_date.date()), MessageType.INFO)
         while curr_date<=max_date:
@@ -82,7 +82,10 @@ class DataManagement:
 
             if not self.eval_all_values_none(curr_date_dict):
                 curr_date_dict["date"]=curr_date
-                curr_date_dict[DataManagement._CLASSIFICATION_COL]=self.assign_classification(curr_date)
+
+                if add_classif_col:
+                    curr_date_dict[DataManagement._CLASSIFICATION_COL]=self.assign_classification(curr_date)
+
                 self.logger.do_log("Adding dataframe row for date {}".format(curr_date.date()),MessageType.INFO)
                 series_df=series_df.append(curr_date_dict, ignore_index=True)
 
@@ -95,7 +98,7 @@ class DataManagement:
         self.classification_map_values=self.date_range_classification_mgr.get_date_range_classification_values(self.classification_map_key)
         pass
 
-    def build_series(self,series_csv,d_from,d_to):
+    def     build_series(self,series_csv,d_from,d_to,add_classif_col=True):
         series_list = series_csv.split(",")
 
         series_data_dict = {}
@@ -109,9 +112,12 @@ class DataManagement:
 
         series_df = self.build_empty_dataframe(series_data_dict)
 
-        self.load_classification_map_date_ranges()
+        if add_classif_col:
 
-        series_df = self.fill_dataframe(series_df, min_date, max_date, series_data_dict)
+            self.load_classification_map_date_ranges()
+
+        series_df = self.fill_dataframe(series_df, min_date, max_date, series_data_dict,
+                                        add_classif_col=add_classif_col)
 
         return  series_df
 
@@ -138,6 +144,19 @@ class DataManagement:
 
         except Exception as e:
             msg = "CRITICAL ERROR processing model @evaluate_algorithms_performance:".format(str(e))
+            self.logger.do_log(msg, MessageType.ERROR)
+            raise Exception(msg)
+
+    def run_predictions_last_model(self,series_csv,d_from,d_to):
+
+        try:
+            series_df = self.build_series(series_csv, d_from, d_to,add_classif_col=False)
+            mlAnalyzer = MLModelAnalyzer(self.logger)
+            pred_dict = mlAnalyzer.run_predictions_last_model(series_df)
+            return pred_dict
+
+        except Exception as e:
+            msg = "CRITICAL ERROR processing model @run_predictions_last_model:".format(str(e))
             self.logger.do_log(msg, MessageType.ERROR)
             raise Exception(msg)
 
