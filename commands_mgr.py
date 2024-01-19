@@ -10,6 +10,10 @@ _DATE_FORMAT="%m/%d/%Y"
 def show_commands():
 
     print("#1-EvaluateAlgos [SeriesCSV]")
+    print("#2-EvaluateAlgosLastModel [SeriesCSV] [from] [to]")
+    print("#3-RunPredictionsLastModel [SeriesCSV] [from] [to]")
+    print("#3-EvalTradingPerformance [Symbol] [SeriesCSV] [from] [to] [Bias]")
+
     print("#n-Exit")
 
 def params_validation(cmd,param_list,exp_len):
@@ -52,6 +56,34 @@ def process_evaluate_algos_last_model(cmd_param_list,str_from,str_to):
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)),MessageType.ERROR)
 
 
+
+def process_eval_trading_performance(symbol, cmd_series_csv,str_from,str_to,bias):
+    loader = SettingsLoader()
+    logger = Logger()
+    try:
+        logger.print("Evaluating trading performance for symbol from last model from {} to {}".format(str_from, str_to), MessageType.INFO)
+
+        config_settings = loader.load_settings("./configs/commands_mgr.ini")
+
+        dataMgm = DataManagement(config_settings["hist_data_conn_str"], config_settings["ml_reports_conn_str"],
+                                 config_settings["classification_map_key"], logger)
+        portf_pos_dict = dataMgm.evaluate_trading_performance(symbol,cmd_series_csv,
+                                                       DateHandler.convert_str_date(str_from, _DATE_FORMAT),
+                                                       DateHandler.convert_str_date(str_to, _DATE_FORMAT),bias)
+        print("Displaying all the different models predictions for the different alogs:")
+
+        for key in portf_pos_dict.keys():
+            print("============{}============ for {}".format(key,symbol))
+            trades_col=portf_pos_dict[key]
+            for trade in trades_col:
+                print(" ==> Side={} Open_Price={} Close_Price={} Pct. Profit={} Nom. Th. Profit={}"
+                      .format(trade.side, trade.price_open, trade.price_close, trade.calculate_pct_profit(),
+                              trade.calculate_th_nom_profit()))
+
+
+    except Exception as e:
+        logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
+
 def process_run_preductions_last_model(cmd_param_list,str_from,str_to):
     loader = SettingsLoader()
     logger = Logger()
@@ -93,6 +125,10 @@ def process_commands(cmd):
     elif cmd_param_list[0]=="RunPredictionsLastModel":
         params_validation("RunPredictionsLastModel", cmd_param_list, 4)
         process_run_preductions_last_model( cmd_param_list[1], cmd_param_list[2], cmd_param_list[3])
+    elif cmd_param_list[0]=="EvalTradingPerformance":
+        params_validation("EvalTradingPerformance", cmd_param_list, 6)
+        process_eval_trading_performance( cmd_param_list[1], cmd_param_list[2], cmd_param_list[3], cmd_param_list[4], cmd_param_list[5])
+    #
 
     else:
         print("Not recognized command {}".format(cmd_param_list[0]))

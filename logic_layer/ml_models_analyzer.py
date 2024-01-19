@@ -10,6 +10,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 # Decision Tree classification algorithm
 from sklearn.tree import DecisionTreeClassifier
+
+from business_entities.portf_position import PortfoliioPosition
 from framework.common.logger.message_type import MessageType
 # K Nearest Neighbors classification algorithm
 from sklearn.neighbors import KNeighborsClassifier
@@ -32,7 +34,26 @@ class MLModelAnalyzer():
         self.logger=p_logger
 
 
-    def map_num_to_cat_array(self,y_hat_num,y_mapping):
+    def __extract_value_from_df__(self,panda_df,key,key_val,val_col ):
+
+        if panda_df[key] is not None:
+            row_df= panda_df[panda_df[key]==key_val]
+
+            if row_df is not None:
+                return  row_df[val_col]
+            else:
+                raise Exception("Could not find column {} for a row with key value {}".format(val_col,key))
+        else:
+            raise Exception("Could not find row wiht key {}".format(key))
+
+    def __validate_bias__(self,side,bias):
+        if bias=="NONE":
+            return True
+        else:
+            return side==bias
+
+
+    def __map_num_to_cat_array__(self,y_hat_num,y_mapping):
         y_hat_cat=[]
         for pred_value in y_hat_num:
             for key, value in y_mapping.items():
@@ -42,20 +63,18 @@ class MLModelAnalyzer():
 
         return  y_hat_cat
 
-
-    def persist_model(self,trained_algo,algo_name,y_mapping):
+    def __persist_model__(self,trained_algo,algo_name,y_mapping):
         file_path="{}{}".format(_OUTPUT_PATH,"{}.pkl".format(algo_name))
         with open(file_path, 'wb') as file:
             pickle.dump({'model': trained_algo, 'label_mapping': y_mapping}, file)
 
-    def fetch_model(self,algo_name):
+    def __fetch_model__(self,algo_name):
         file_path = "{}{}".format(_OUTPUT_PATH, "{}.pkl".format(algo_name))
         with open(file_path, 'rb') as file:
             loaded_model = pickle.load(file)
             return loaded_model
 
-
-    def get_int_mapping(self,df,col):
+    def __get_int_mapping__(self,df,col):
         unique_values = df[col].unique()
         i=0
         mapping={}
@@ -65,13 +84,13 @@ class MLModelAnalyzer():
 
         return mapping
 
-    def map_categorical_Y(self,df_Y,classification_col):
+    def __map_categorical_Y__(self,df_Y,classification_col):
         # We normalize the Y categorical axis
-        mapping = self.get_int_mapping(df_Y, classification_col)  # We gte SHORT=1,LONG=2, etc.
+        mapping = self.__get_int_mapping__(df_Y, classification_col)  # We gte SHORT=1,LONG=2, etc.
         Y = df_Y[classification_col].map(mapping)
         return Y,mapping
 
-    def normalize_X(self,df_X):
+    def __normalize_X__(self,df_X):
 
         # Fill NaN values with the values from the previous row
         df_X = df_X.fillna(method='ffill')
@@ -88,7 +107,7 @@ class MLModelAnalyzer():
         X=X[all_colls]
         return X
 
-    def extract_non_numeric(self,X):
+    def  __extract_non_numeric__(self,X):
         X_num_cols = X.select_dtypes(include='number').columns
         X_numeric = X[X_num_cols]
         return  X_numeric
@@ -97,7 +116,7 @@ class MLModelAnalyzer():
         # TRAINING - Logistic Regression w/GridSearchcv
         resp_row = {'Model': 'Logistic Regression', 'Train Accuracy': None,'Test Accuracy':None}
 
-        X_train_num=self.extract_non_numeric(X_train)
+        X_train_num= self.__extract_non_numeric__(X_train)
 
         parameters = {"C": [0.01, 0.1, 1], 'penalty': ['l2'], 'solver': ['lbfgs']}
         lr = LogisticRegression()
@@ -108,13 +127,12 @@ class MLModelAnalyzer():
         resp_row["Train Accuracy"] = logreg_cv.best_score_
 
         # TEST - Accuracy of test data versus predictions + conf. matrix of predictions
-        X_test_num = self.extract_non_numeric(X_test)
+        X_test_num = self.__extract_non_numeric__(X_test)
         lr_accuracy = logreg_cv.score(X_test_num, y_test)
         resp_row["Test Accuracy"] = lr_accuracy
         self.logger.do_log("Logistic Regression - Test Accuracy Score :{}".format(lr_accuracy),MessageType.INFO)
 
-
-        self.persist_model(logreg_cv.best_estimator_,_LOGISTIC_REGRESSION_MODEL_NAME,y_mapping)
+        self.__persist_model__(logreg_cv.best_estimator_, _LOGISTIC_REGRESSION_MODEL_NAME, y_mapping)
 
         #yhat = logreg_cv.predict(X_test)
         # self.plot_confusion_matrix(y_test, yhat)
@@ -137,28 +155,27 @@ class MLModelAnalyzer():
         resp_row["Recall"] = recall
         return resp_row
 
-
     def run_logistic_regression_eval_out_of_sample(self,X_test,y_test):
         # TRAINING - Logistic Regression w/GridSearchcv
-        lr = self.fetch_model(_LOGISTIC_REGRESSION_MODEL_NAME)["model"]
+        lr = self.__fetch_model__(_LOGISTIC_REGRESSION_MODEL_NAME)["model"]
 
         # TEST - Accuracy of test data versus predictions + conf. matrix of predictions
-        X_test_num = self.extract_non_numeric(X_test)
+        X_test_num = self.__extract_non_numeric__(X_test)
         y_hat = lr.predict(X_test_num)
         return  self.build_out_of_sample_report_row("Logistic Regression",y_test,y_hat)
 
     def run_predictions(self,X_test,key_col,model_name):
         # TRAINING - Logistic Regression w/GridSearchcv
-        model_dict = self.fetch_model(model_name)
+        model_dict = self.__fetch_model__(model_name)
 
         model=model_dict["model"]
         y_mapping=model_dict["label_mapping"]
 
         # TEST - Accuracy of test data versus predictions + conf. matrix of predictions
-        X_test_num = self.extract_non_numeric(X_test)
+        X_test_num = self.__extract_non_numeric__(X_test)
         y_hat_num = model.predict(X_test_num)
 
-        y_hat_cat=self.map_num_to_cat_array(y_hat_num,y_mapping)
+        y_hat_cat= self.__map_num_to_cat_array__(y_hat_num, y_mapping)
 
         df_Y =pd.DataFrame( pd.Series(y_hat_cat, name='Prediction'))
 
@@ -166,32 +183,30 @@ class MLModelAnalyzer():
 
         return  preds_df
 
-
-
     def run_support_vector_machine_eval_out_of_sample(self,X_test,y_test):
         # TRAINING - SVM w/GridSearchcv
-        svm = self.fetch_model(_SVM_MODEL_NAME)["model"]
+        svm = self.__fetch_model__(_SVM_MODEL_NAME)["model"]
 
         # TEST - Accuracy of test data versus predictions + conf. matrix of predictions
-        X_test_num = self.extract_non_numeric(X_test)
+        X_test_num = self.__extract_non_numeric__(X_test)
         y_hat = svm.predict(X_test_num)
         return  self.build_out_of_sample_report_row("Support Vector Machine",y_test,y_hat)
 
     def run_decission_tree_eval_out_of_sample(self,X_test,y_test):
         # TRAINING - Decission Tree w/GridSearchcv
-        dec_tree = self.fetch_model(_DECISSION_TREE_MODEL_NAME)["model"]
+        dec_tree = self.__fetch_model__(_DECISSION_TREE_MODEL_NAME)["model"]
 
         # TEST - Accuracy of test data versus predictions + conf. matrix of predictions
-        X_test_num = self.extract_non_numeric(X_test)
+        X_test_num = self.__extract_non_numeric__(X_test)
         y_hat = dec_tree.predict(X_test_num)
         return  self.build_out_of_sample_report_row("Decission Tree",y_test,y_hat)
 
     def run_K_nearest_neighbour_eval_out_of_sample(self,X_test,y_test):
         # TRAINING - K-Nearest Neighbour w/GridSearchcv
-        knn = self.fetch_model(_KNN_MODEL_NAME)["model"]
+        knn = self.__fetch_model__(_KNN_MODEL_NAME)["model"]
 
         # TEST - Accuracy of test data versus predictions + conf. matrix of predictions
-        X_test_num = self.extract_non_numeric(X_test)
+        X_test_num = self.__extract_non_numeric__(X_test)
         y_hat = knn.predict(X_test_num)
         return  self.build_out_of_sample_report_row("K-Nearest Neighbour",y_test,y_hat)
 
@@ -199,7 +214,7 @@ class MLModelAnalyzer():
         # TRAINING - SVM w/GridSearchcv
         resp_row = {'Model': 'Support Vector Machine', 'Train Accuracy': None, 'Test Accuracy': None}
 
-        X_train_num = self.extract_non_numeric(X_train)
+        X_train_num = self.__extract_non_numeric__(X_train)
 
         parameters = {'kernel': ('linear', 'rbf', 'poly', 'rbf', 'sigmoid'),
                       'C': np.logspace(-3, 3, 5),
@@ -212,14 +227,14 @@ class MLModelAnalyzer():
         resp_row["Train Accuracy"] =svm_cv.best_score_
 
         # TEST Calculate the accuracy on the test data using the method score
-        X_test_num = self.extract_non_numeric(X_test)
+        X_test_num = self.__extract_non_numeric__(X_test)
         svm_accuracy = svm_cv.score(X_test_num, y_test)
         resp_row["Test Accuracy"] = svm_accuracy
         self.logger.do_log("Support Vector Machine - Test Accuracy Score :{}".format(svm_accuracy), MessageType.INFO)
 
         #yhat = logreg_cv.predict(X_test)
         #self.plot_confusion_matrix(y_test, yhat)
-        self.persist_model(svm_cv.best_estimator_, _SVM_MODEL_NAME,y_mapping)
+        self.__persist_model__(svm_cv.best_estimator_, _SVM_MODEL_NAME, y_mapping)
 
         return resp_row
 
@@ -227,7 +242,7 @@ class MLModelAnalyzer():
         # TRAINING - Decission Tree w/GridSearchcv
         resp_row = {'Model': 'Decision Tree', 'Train Accuracy': None, 'Test Accuracy': None}
 
-        X_train_num = self.extract_non_numeric(X_train)
+        X_train_num = self.__extract_non_numeric__(X_train)
 
         parameters = {'criterion': ['gini', 'entropy'],
                       'splitter': ['best', 'random'],
@@ -244,12 +259,12 @@ class MLModelAnalyzer():
         resp_row["Train Accuracy"] = tree_cv.best_score_
 
         # TEST Calculate the accuracy on the test data using the method score
-        X_test_num = self.extract_non_numeric(X_test)
+        X_test_num = self.__extract_non_numeric__(X_test)
         tree_accuracy = tree_cv.score(X_test_num, y_test)
         self.logger.do_log("Decision Tree - Test Accuracy Score :{}".format(tree_accuracy),MessageType.INFO)
         resp_row["Test Accuracy"] = tree_accuracy
 
-        self.persist_model(tree_cv.best_estimator_, _DECISSION_TREE_MODEL_NAME,y_mapping)
+        self.__persist_model__(tree_cv.best_estimator_, _DECISSION_TREE_MODEL_NAME, y_mapping)
 
         return resp_row
 
@@ -257,7 +272,7 @@ class MLModelAnalyzer():
         # TRAINING - KNN w/GridSearchcv
         resp_row = {'Model': 'K Nearest Neighbour', 'Train Accuracy': None, 'Test Accuracy': None}
 
-        X_train_num = self.extract_non_numeric(X_train)
+        X_train_num = self.__extract_non_numeric__(X_train)
 
         parameters = {'n_neighbors': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                       'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute'],
@@ -271,12 +286,12 @@ class MLModelAnalyzer():
         resp_row["Train Accuracy"] = knn_cv.best_score_
 
         # TEST Calculate the accuracy on the test data using the method score
-        X_test_num = self.extract_non_numeric(X_test)
+        X_test_num = self.__extract_non_numeric__(X_test)
         knn_accuracy = knn_cv.score(X_test_num, y_test)
         self.logger.do_log("KNN - Test Accuracy Score :{}".format(knn_accuracy),MessageType.INFO)
         resp_row["Test Accuracy"] = knn_accuracy
 
-        self.persist_model(knn_cv.best_estimator_, _KNN_MODEL_NAME,y_mapping)
+        self.__persist_model__(knn_cv.best_estimator_, _KNN_MODEL_NAME, y_mapping)
         return resp_row
 
 
@@ -293,10 +308,10 @@ class MLModelAnalyzer():
         #df_X = pd.get_dummies(df_X)  # converts the categorical values into mult. cols
 
         #We map the Y categorical axis to int values
-        Y,y_mapping=self.map_categorical_Y(df_Y, classification_col)
+        Y,y_mapping= self.__map_categorical_Y__(df_Y, classification_col)
 
         #Then we normalize all the numerical values of X
-        X=self.normalize_X(df_X)
+        X= self.__normalize_X__(df_X)
 
         #STEP 3 - Split the data into training and test
         X_train, X_test, y_train, y_test =train_test_split(X, Y,test_size=0.2,random_state=2)
@@ -332,10 +347,10 @@ class MLModelAnalyzer():
         #df_X = pd.get_dummies(df_X)  # converts the categorical values into mult. cols
 
         #We map the Y categorical axis to int values
-        Y,y_mapping=self.map_categorical_Y(df_Y, classification_col)
+        Y,y_mapping= self.__map_categorical_Y__(df_Y, classification_col)
 
         #Then we normalize all the numerical values of X
-        X=self.normalize_X(df_X)
+        X= self.__normalize_X__(df_X)
 
         #LOGISTIC REGRESSION
         resp_row= self.run_logistic_regression_eval_out_of_sample(X,Y)
@@ -366,7 +381,7 @@ class MLModelAnalyzer():
         #df_X = pd.get_dummies(df_X)  # converts the categorical values into mult. cols
 
         #STEP 3- Then we normalize all the numerical values of X
-        X=self.normalize_X(df_X)
+        X= self.__normalize_X__(df_X)
 
         #LOGISTIC REGRESSION
         y_hat_lr_df= self.run_predictions(X,"date",_LOGISTIC_REGRESSION_MODEL_NAME)
@@ -386,3 +401,66 @@ class MLModelAnalyzer():
 
 
         return predictions_dict
+
+    def evaluate_trading_performance_last_model(self,symbol_df,symbol, series_df,bias):
+        predictions_dic = self.run_predictions_last_model(series_df)
+
+        portf_pos_dict={}
+
+        for key in predictions_dic.keys():
+            curr_portf_pos=None
+            last_side=None
+            portf_pos = []
+            predictions_df=predictions_dic[key]
+
+            for index,day in predictions_df.iterrows():
+
+                if curr_portf_pos is None and last_side is None:
+                    if self.__validate_bias__(day["Prediction"],bias):
+                        curr_portf_pos = PortfoliioPosition(symbol)
+                        ref_price= self.__extract_value_from_df__(symbol_df, "date", day["date"], symbol)
+                        curr_portf_pos.open_pos(day["Prediction"],day["date"],ref_price)
+                        last_side=day["Prediction"]
+                elif last_side != day["Prediction"]:#chage the side
+
+                    # 1- Close the old position
+                    ref_price = self.__extract_value_from_df__(symbol_df, "date", day["date"], symbol)
+                    curr_portf_pos.close_pos(day["date"], ref_price)
+                    portf_pos.append(curr_portf_pos)
+
+                    #2- Open the new one?
+                    if self.__validate_bias__(day["Prediction"], bias):
+
+                        if curr_portf_pos is not None:
+
+                            #2- Open the new one
+                            curr_portf_pos=PortfoliioPosition(symbol)
+                            ref_price = self.__extract_value_from_df__(symbol_df, "date", day["date"], symbol)
+                            curr_portf_pos.open_pos(day["Prediction"],day["date"],ref_price)
+                            last_side=day["Prediction"]
+                    else:#3-We go flat
+                        curr_portf_pos=None
+                        last_side=None
+
+            #We add the last position
+            if curr_portf_pos is not None:
+                last_day=predictions_dic[key].iloc[-1]
+                ref_price = self.__extract_value_from_df__(symbol_df, "date", last_day["date"], symbol)
+                curr_portf_pos.close_pos(last_day["date"],ref_price)
+                portf_pos.append(curr_portf_pos)
+
+            portf_pos_dict[key]=portf_pos
+
+
+        return  portf_pos_dict
+
+
+
+
+
+
+
+
+
+
+

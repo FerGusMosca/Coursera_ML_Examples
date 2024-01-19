@@ -134,16 +134,17 @@ class DataManagement:
             self.logger.do_log(msg,MessageType.ERROR)
             raise Exception(msg)
 
-    def evaluate_algorithms_performance_last_model(self,series_csv,d_from,d_to):
+    def evaluate_trading_performance(self,symbol,series_csv,d_from,d_to,bias):
 
         try:
+            symbol_df = self.build_series(symbol,d_from,d_to)
             series_df = self.build_series(series_csv, d_from, d_to)
             mlAnalyzer = MLModelAnalyzer(self.logger)
-            comp_df = mlAnalyzer.fetch_and_evaluate(series_df, DataManagement._CLASSIFICATION_COL)
-            return comp_df
+            portf_pos_dict = mlAnalyzer.evaluate_trading_performance_last_model(symbol_df,symbol,series_df, bias)
+            return portf_pos_dict
 
         except Exception as e:
-            msg = "CRITICAL ERROR processing model @evaluate_algorithms_performance:".format(str(e))
+            msg = "CRITICAL ERROR processing model @evaluate_trading_performance:".format(str(e))
             self.logger.do_log(msg, MessageType.ERROR)
             raise Exception(msg)
 
