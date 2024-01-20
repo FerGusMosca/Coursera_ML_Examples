@@ -415,32 +415,36 @@ class MLModelAnalyzer():
 
             for index,day in predictions_df.iterrows():
 
-                if curr_portf_pos is None and last_side is None:
-                    if self.__validate_bias__(day["Prediction"],bias):
-                        curr_portf_pos = PortfoliioPosition(symbol)
-                        ref_price= self.__extract_value_from_df__(symbol_df, "date", day["date"], symbol)
-                        curr_portf_pos.open_pos(day["Prediction"],day["date"],ref_price)
-                        last_side=day["Prediction"]
-                elif last_side != day["Prediction"]:#chage the side
+                try:
 
-                    # 1- Close the old position
-                    ref_price = self.__extract_value_from_df__(symbol_df, "date", day["date"], symbol)
-                    curr_portf_pos.close_pos(day["date"], ref_price)
-                    portf_pos.append(curr_portf_pos)
-
-                    #2- Open the new one?
-                    if self.__validate_bias__(day["Prediction"], bias):
-
-                        if curr_portf_pos is not None:
-
-                            #2- Open the new one
-                            curr_portf_pos=PortfoliioPosition(symbol)
-                            ref_price = self.__extract_value_from_df__(symbol_df, "date", day["date"], symbol)
+                    if curr_portf_pos is None and last_side is None:
+                        if self.__validate_bias__(day["Prediction"],bias):
+                            curr_portf_pos = PortfoliioPosition(symbol)
+                            ref_price= self.__extract_value_from_df__(symbol_df, "date", day["date"], symbol)
                             curr_portf_pos.open_pos(day["Prediction"],day["date"],ref_price)
                             last_side=day["Prediction"]
-                    else:#3-We go flat
-                        curr_portf_pos=None
-                        last_side=None
+                    elif last_side != day["Prediction"]:#chage the side
+
+                        # 1- Close the old position
+                        ref_price = self.__extract_value_from_df__(symbol_df, "date", day["date"], symbol)
+                        curr_portf_pos.close_pos(day["date"], ref_price)
+                        portf_pos.append(curr_portf_pos)
+
+                        #2- Open the new one?
+                        if self.__validate_bias__(day["Prediction"], bias):
+
+                            if curr_portf_pos is not None:
+
+                                #2- Open the new one
+                                curr_portf_pos=PortfoliioPosition(symbol)
+                                ref_price = self.__extract_value_from_df__(symbol_df, "date", day["date"], symbol)
+                                curr_portf_pos.open_pos(day["Prediction"],day["date"],ref_price)
+                                last_side=day["Prediction"]
+                        else:#3-We go flat
+                            curr_portf_pos=None
+                            last_side=None
+                except Exception as e:
+                    raise Exception("Error processing day {} for algo {}".format(day["date"],key))
 
             #We add the last position
             if curr_portf_pos is not None:

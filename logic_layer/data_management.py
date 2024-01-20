@@ -130,7 +130,7 @@ class DataManagement:
             return comp_df
 
         except Exception as e:
-            msg="CRITICAL ERROR processing model @evaluate_algorithms_performance:".format(str(e))
+            msg="CRITICAL ERROR processing model @evaluate_algorithms_performance:{}".format(str(e))
             self.logger.do_log(msg,MessageType.ERROR)
             raise Exception(msg)
 
@@ -144,7 +144,7 @@ class DataManagement:
             return portf_pos_dict
 
         except Exception as e:
-            msg = "CRITICAL ERROR processing model @evaluate_trading_performance:".format(str(e))
+            msg = "CRITICAL ERROR processing model @evaluate_trading_performance:{}".format(str(e))
             self.logger.do_log(msg, MessageType.ERROR)
             raise Exception(msg)
 
@@ -157,7 +157,7 @@ class DataManagement:
             return pred_dict
 
         except Exception as e:
-            msg = "CRITICAL ERROR processing model @run_predictions_last_model:".format(str(e))
+            msg = "CRITICAL ERROR processing model @run_predictions_last_model:{}".format(str(e))
             self.logger.do_log(msg, MessageType.ERROR)
             raise Exception(msg)
 
