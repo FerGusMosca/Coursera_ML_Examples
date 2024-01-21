@@ -8,6 +8,7 @@ from classification.decission_tree import DecissionTree
 from classification.k_nearest_neighbour import KNearestNeighbour
 from exams.exam10_presentation_calculations import Exam10PresentationCalculations
 from exams.exam5_stocks_analysis import StocksAnalysisSummary
+from exams.exam_5_final_exam import Exam5FinalExam
 from exams.exam_8_dashboard import Module8Dashboard
 from exams.module_7_final_exam import Module7Exam
 from exams.module_8_final_exam import Module8Exam
@@ -127,9 +128,11 @@ def exam_10_presentation_calculations():
 
 
 def exam_5_stocks_analysis():
-    app=StocksAnalysisSummary()
+    app=Exam5FinalExam()
+    app.init_dashboard()
+    #app=StocksAnalysisSummary()
     #app.q1_extract_stock_price_w_yahoo()
-    app.q3_extract_stock_price_w_yahoo()
+    #app.q3_extract_stock_price_w_yahoo()
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
