@@ -76,8 +76,8 @@ def process_eval_trading_performance(symbol, cmd_series_csv,str_from,str_to,bias
             print("============{}============ for {}".format(key,symbol))
             trades_col=portf_pos_dict[key]
             for trade in trades_col:
-                print(" ==> Side={} Open_Price={} Close_Price={} Pct. Profit={} Nom. Th. Profit={}"
-                      .format(trade.side, trade.price_open, trade.price_close, trade.calculate_pct_profit(),
+                print(" ==> Side={} Open_Price={} Open Date={} Close_Price={} Close Date={} Pct. Profit={} Nom. Th. Profit={}"
+                      .format(trade.side, trade.price_open,trade.date_open, trade.price_close,trade.date_close, trade.calculate_pct_profit(),
                               trade.calculate_th_nom_profit()))
 
 

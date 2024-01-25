@@ -107,6 +107,13 @@ class MLModelAnalyzer():
         X=X[all_colls]
         return X
 
+    def __clean_NaN__(self,X_train,X_test,y_train,y_test):
+        X_train = X_train.fillna(method='ffill')  # we remove NaN from Y --> prev value
+        y_train = y_train.fillna(method='ffill')  # we remove NaN from Y --> prev value
+        X_test = X_test.fillna(method='ffill')  # we remove NaN from Y --> prev value
+        y_test = y_test.fillna(method='ffill')  # we remove NaN from Y --> prev value
+        return X_train, X_test, y_train, y_test
+
     def  __extract_non_numeric__(self,X):
         X_num_cols = X.select_dtypes(include='number').columns
         X_numeric = X[X_num_cols]
@@ -311,10 +318,11 @@ class MLModelAnalyzer():
         Y,y_mapping= self.__map_categorical_Y__(df_Y, classification_col)
 
         #Then we normalize all the numerical values of X
-        X= self.__normalize_X__(df_X)
+        X= self.__normalize_X__(df_X)#we normalize X
 
         #STEP 3 - Split the data into training and test
         X_train, X_test, y_train, y_test =train_test_split(X, Y,test_size=0.2,random_state=2)
+        X_train, X_test, y_train, y_test =self.__clean_NaN__(X_train,X_test,y_train,y_test)
 
         #LOGISTIC REGRESSION
         resp_row= self.run_logistic_regression_eval(X_train, y_train,X_test,y_test,y_mapping)

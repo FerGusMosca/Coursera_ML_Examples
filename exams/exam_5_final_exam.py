@@ -180,7 +180,7 @@ class Exam5FinalExam:
             symbol_prices_df=Exam5FinalExam.get_prices_df(symbol,from_date,to_date)
 
             #we create the records dictionary
-            data_dict=symbol_prices_df.head().to_dict('records')
+            data_dict=symbol_prices_df.head(5).to_dict('records')
 
             div_table = html.Div([
                 dash_table.DataTable(
