@@ -17,6 +17,7 @@ from excercises.course10_space_Y_data_visualization import Course10SpaceYDataVis
 from excercises.course10_space_y_machine_learning_algorithms_comparisson import Course10SpaceYMachineLearningPrediction
 from excercises.course_10_space_Y_data_collection_test import Course10SpaceYDataCollectionTest
 from excercises.course_10_space_Y_data_wrangling import Course10SpaceYDataWranglingTest
+from test_algorithms.ARIMA_tests import ARIMATests
 from test_algorithms.decission_tree_test import DecissionTreeTest
 from test_algorithms.k_means_test import KMeansTest
 from test_algorithms.k_nearest_test import KNearestTest
@@ -134,6 +135,9 @@ def exam_5_stocks_analysis():
     #app.q1_extract_stock_price_w_yahoo()
     #app.q3_extract_stock_price_w_yahoo()
 
+def ARIMA_tests():
+    ARIMATests.test_stock_predictions()
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
@@ -146,7 +150,8 @@ if __name__ == '__main__':
     #module8_test()
     #course_10_week_1_practice()
     #exam_10_presentation_calculations()
-    exam_5_stocks_analysis()
+    #exam_5_stocks_analysis()
+    ARIMA_tests()
     raw_input("Press Enter to continue...")
 
 
