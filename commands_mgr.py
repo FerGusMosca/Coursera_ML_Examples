@@ -14,6 +14,7 @@ def show_commands():
     print("#3-RunPredictionsLastModel [SeriesCSV] [from] [to]")
     print("#4-EvalTradingPerformance [Symbol] [SeriesCSV] [from] [to] [Bias]")
     print("#5-EvaluateARIMA [Symbol] [Period] [from] [to]")
+    print("#6-PredictARIMA [Symbol] [p] [d] [q] [from] [to] [Period] [Step]")
 
     print("#n-Exit")
 
@@ -138,6 +139,31 @@ def process_eval_ARIMA(symbol,period, str_from,str_to):
     except Exception as e:
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
 
+def process_predict_ARIMA(symbol, p,d,q, str_from,str_to,period,step):
+    loader = SettingsLoader()
+    logger = Logger()
+    try:
+        logger.print("Predicting w/last built ARIMA model for {} (period {}) from {} to {}".format(symbol,period, str_from, str_to), MessageType.INFO)
+
+        config_settings = loader.load_settings("./configs/commands_mgr.ini")
+
+        dataMgm = DataManagement(config_settings["hist_data_conn_str"], config_settings["ml_reports_conn_str"],
+                                 config_settings["classification_map_key"], logger)
+        preds_list = dataMgm.predict_ARIMA(symbol,int(p),int(d),int(q),
+                                       DateHandler.convert_str_date(str_from, _DATE_FORMAT),
+                                       DateHandler.convert_str_date(str_to, _DATE_FORMAT),
+                                      period,int(step))
+        print("==== Displaying Predictions for following periods ==== ")
+        i=1
+        for pred in preds_list:
+            print("{} --> {} %".format(period+str(i),"{:.2f}".format(pred*100)))
+            i+=1
+
+        pass #brkpnt to see the graph!
+
+    except Exception as e:
+        logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
+
 
 def process_commands(cmd):
 
@@ -159,6 +185,10 @@ def process_commands(cmd):
     elif cmd_param_list[0] == "EvaluateARIMA":
         params_validation("EvaluateARIMA", cmd_param_list, 5)
         process_eval_ARIMA(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3], cmd_param_list[4])
+    elif cmd_param_list[0] == "PredictARIMA":
+        params_validation("PredictARIMA", cmd_param_list, 9)
+        process_predict_ARIMA(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3], cmd_param_list[4],
+                              cmd_param_list[5], cmd_param_list[6], cmd_param_list[7], cmd_param_list[8])
 
 
     else:

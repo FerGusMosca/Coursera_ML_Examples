@@ -71,3 +71,16 @@ class DataManagement:
             raise Exception(msg)
 
 
+    def predict_ARIMA(self,symbol, p,d,q,d_from,d_to,period, steps):
+        try:
+            series_df = self.data_set_builder.build_series(symbol, d_from, d_to, add_classif_col=False)
+            arima_Analyzer = ARIMAModelsAnalyzer(self.logger)
+            preds=arima_Analyzer.build_and__predict_ARIMA_model(series_df,symbol,p,d,q,period,steps)
+            return preds
+
+        except Exception as e:
+            msg = "CRITICAL ERROR processing model @predict_ARIMA:{}".format(str(e))
+            self.logger.do_log(msg, MessageType.ERROR)
+            raise Exception(msg)
+
+

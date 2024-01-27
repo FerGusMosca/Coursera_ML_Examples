@@ -81,6 +81,31 @@ class ARIMAModelsAnalyzer():
 
         return  dickey_fuller_test_dict
 
+
+    def __build_ARIMA__(self,udiff,p,d,q):
+        # Notice that you have to use udiff - the differenced data rather than the original data.
+        ar1 = ARIMA(udiff.values, order=(p,d,q)).fit()
+        ar1.summary()
+        return ar1
+
+
+
+    def __run_forecast__(self,udiff,ar1,steps):
+
+        forecast = ar1.forecast(steps=steps)
+        preds = ar1.fittedvalues
+        # plt.figure(figsize=(12, 8))
+        # plt.plot(udiff.values, color='blue')
+        # plt.plot(preds, color='red')
+        #
+        # plt.plot(pd.DataFrame(np.array([preds[-1], forecast[0]]).T,
+        #                       index=range(len(udiff.values) + 1, len(udiff.values) + 3)), color='green')
+        # plt.plot(pd.DataFrame(forecast, index=range(len(udiff.values) + 1, len(udiff.values) + 1 + steps)),
+        #          color='green')
+        # plt.title('Display the predictions with the ARIMA model')
+        # plt.show()
+        return forecast
+
     #endregion
 
 
@@ -99,3 +124,15 @@ class ARIMAModelsAnalyzer():
         dickey_fuller_test_dict=self.__perf_dickey_fuller_test__(udiff)
 
         return dickey_fuller_test_dict
+
+
+    def build_and__predict_ARIMA_model(self,series_df,symbol,p,d,q,period,step):
+        df_period=self.__aggregate_weekly_basis__(series_df,symbol,period)
+        udiff=self.__add_weekly_returns__(df_period,symbol)
+        ar1=self.__build_ARIMA__(udiff,p,d,q)
+
+        preds=self.__run_forecast__(udiff,ar1,step)
+
+        forecast_list = preds.tolist()
+
+        return forecast_list
