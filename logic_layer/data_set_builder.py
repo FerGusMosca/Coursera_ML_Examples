@@ -102,6 +102,9 @@ class DataSetBuilder():
         for serieID in series_list:
             economic_values = self.economic_series_mgr.get_economic_values(serieID, DataSetBuilder._1_DAY_INTERVAL,
                                                                            d_from, d_to)
+            if len(economic_values)==0:
+                raise  Exception("No data found for SeriesID {}".format(serieID))
+
             series_data_dict[serieID] = economic_values
 
         min_date, max_date = self.get_extreme_dates(series_data_dict)

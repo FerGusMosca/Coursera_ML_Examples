@@ -11,7 +11,6 @@ from statsmodels.graphics.tsaplots import plot_pacf
 from statsmodels.tsa.arima.model import ARIMA
 from util.file_downloader import FileDownloader
 
-
 class ARIMATests():
 
 
@@ -84,6 +83,7 @@ class ARIMATests():
 
     @staticmethod
     #The ACF gives us a measure of how much each "y" value is correlated to the previous n "y" values prior.
+    #Helps us choose the q parameter
     def acf_auto_corr_plot(udiff):
         fig, ax = plt.subplots(figsize=(12, 5))
         plot_acf(udiff.values, lags=10, ax=ax)
@@ -92,6 +92,7 @@ class ARIMATests():
     @staticmethod
     #he PACF is the partial correlation function gives us (a sample of) the amount of correlation between two "y" values
     # separated by n lags excluding the impact of all the "y" values in between them.
+    # Helps us chose the p parameter
     def pacf_auto_corr_plot(udiff):
         fig, ax = plt.subplots(figsize=(12, 5))
         plot_pacf(udiff.values, lags=10, ax=ax)
@@ -101,7 +102,7 @@ class ARIMATests():
     @staticmethod
     def _build_ARIMA(udiff):
         # Notice that you have to use udiff - the differenced data rather than the original data.
-        ar1 = ARIMA(udiff.values, order=(3, 0, 1)).fit()
+        ar1 = ARIMA(udiff.values, order=(1, 0, 1)).fit()
         ar1.summary()
 
         # plt.figure(figsize=(12, 8))

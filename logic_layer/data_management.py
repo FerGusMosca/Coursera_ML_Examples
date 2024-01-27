@@ -4,6 +4,7 @@ from data_access_layer.date_range_classification_manager import DateRangeClassif
 from data_access_layer.economic_series_manager import EconomicSeriesManager
 
 from framework.common.logger.message_type import MessageType
+from logic_layer.ARIMA_models_analyzer import ARIMAModelsAnalyzer
 from logic_layer.data_set_builder import DataSetBuilder
 from logic_layer.ml_models_analyzer import MLModelAnalyzer
 
@@ -54,6 +55,18 @@ class DataManagement:
 
         except Exception as e:
             msg = "CRITICAL ERROR processing model @run_predictions_last_model:{}".format(str(e))
+            self.logger.do_log(msg, MessageType.ERROR)
+            raise Exception(msg)
+
+    def build_ARIMA(self,symbol, period, d_from, d_to):
+        try:
+            series_df = self.data_set_builder.build_series(symbol, d_from, d_to, add_classif_col=False)
+            arima_Analyzer = ARIMAModelsAnalyzer(self.logger)
+            dickey_fuller_test_dict=arima_Analyzer.build_ARIMA_model(series_df,symbol,period,True)
+            return dickey_fuller_test_dict
+
+        except Exception as e:
+            msg = "CRITICAL ERROR processing model @build_ARIMA:{}".format(str(e))
             self.logger.do_log(msg, MessageType.ERROR)
             raise Exception(msg)
 

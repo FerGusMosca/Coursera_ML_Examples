@@ -12,7 +12,8 @@ def show_commands():
     print("#1-EvaluateAlgos [SeriesCSV]")
     print("#2-EvaluateAlgosLastModel [SeriesCSV] [from] [to]")
     print("#3-RunPredictionsLastModel [SeriesCSV] [from] [to]")
-    print("#3-EvalTradingPerformance [Symbol] [SeriesCSV] [from] [to] [Bias]")
+    print("#4-EvalTradingPerformance [Symbol] [SeriesCSV] [from] [to] [Bias]")
+    print("#5-EvaluateARIMA [Symbol] [Period] [from] [to]")
 
     print("#n-Exit")
 
@@ -84,6 +85,9 @@ def process_eval_trading_performance(symbol, cmd_series_csv,str_from,str_to,bias
     except Exception as e:
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
 
+
+
+
 def process_run_preductions_last_model(cmd_param_list,str_from,str_to):
     loader = SettingsLoader()
     logger = Logger()
@@ -110,6 +114,30 @@ def process_run_preductions_last_model(cmd_param_list,str_from,str_to):
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
 
 
+def process_eval_ARIMA(symbol,period, str_from,str_to):
+    loader = SettingsLoader()
+    logger = Logger()
+    try:
+        logger.print("Building ARIMA model for {} (period {}) from {} to {}".format(symbol,period, str_from, str_to), MessageType.INFO)
+
+        config_settings = loader.load_settings("./configs/commands_mgr.ini")
+
+        dataMgm = DataManagement(config_settings["hist_data_conn_str"], config_settings["ml_reports_conn_str"],
+                                 config_settings["classification_map_key"], logger)
+        pred_dict = dataMgm.build_ARIMA(symbol,period,
+                                       DateHandler.convert_str_date(str_from, _DATE_FORMAT),
+                                       DateHandler.convert_str_date(str_to, _DATE_FORMAT))
+
+        print("======= Showing Dickey Fuller Test after building ARIMA======= ")
+        for key in pred_dict.keys():
+            print("{}={}".format(key,pred_dict[key]))
+
+
+        pass #brkpnt to see the graph!
+
+    except Exception as e:
+        logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
+
 
 def process_commands(cmd):
 
@@ -128,7 +156,10 @@ def process_commands(cmd):
     elif cmd_param_list[0]=="EvalTradingPerformance":
         params_validation("EvalTradingPerformance", cmd_param_list, 6)
         process_eval_trading_performance( cmd_param_list[1], cmd_param_list[2], cmd_param_list[3], cmd_param_list[4], cmd_param_list[5])
-    #
+    elif cmd_param_list[0] == "EvaluateARIMA":
+        params_validation("EvaluateARIMA", cmd_param_list, 5)
+        process_eval_ARIMA(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3], cmd_param_list[4])
+
 
     else:
         print("Not recognized command {}".format(cmd_param_list[0]))
