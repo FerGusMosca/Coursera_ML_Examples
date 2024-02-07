@@ -1,9 +1,11 @@
 
-_SIDE_LONG="LONG"
-_SIDE_SHORT="SHORT"
-_DEF_PORTF_AMT=100000
 
-class PortfoliioPosition():
+
+class PortfolioPosition():
+
+    _SIDE_LONG = "LONG"
+    _SIDE_SHORT = "SHORT"
+    _DEF_PORTF_AMT = 100000
 
     def __init__(self,p_symbol):
         self.symbol =p_symbol
@@ -29,12 +31,12 @@ class PortfoliioPosition():
     def calculate_pct_profit(self):
         if self.price_close is not None and self.price_open is not None:
 
-            if self.side==_SIDE_LONG:
+            if self.side==PortfolioPosition._SIDE_LONG:
                 if self.price_open >0:
                     return round( ((self.price_close-self.price_open)/self.price_open)*100,2)
                 else:
                     raise Exception("Could not divide by 0 on price_open=0 for symbol {}".format(self.symbol))
-            elif self.side == _SIDE_SHORT:
+            elif self.side == PortfolioPosition._SIDE_SHORT:
                     if self.price_open > 0:
                         return round(((self.price_open- self.price_close ) / self.price_open) * 100, 2)
                     else:

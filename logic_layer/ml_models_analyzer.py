@@ -11,7 +11,7 @@ from sklearn.svm import SVC
 # Decision Tree classification algorithm
 from sklearn.tree import DecisionTreeClassifier
 
-from business_entities.portf_position import PortfoliioPosition
+from business_entities.portf_position import PortfolioPosition
 from framework.common.logger.message_type import MessageType
 # K Nearest Neighbors classification algorithm
 from sklearn.neighbors import KNeighborsClassifier
@@ -427,7 +427,7 @@ class MLModelAnalyzer():
 
                     if curr_portf_pos is None and last_side is None:
                         if self.__validate_bias__(day["Prediction"],bias):
-                            curr_portf_pos = PortfoliioPosition(symbol)
+                            curr_portf_pos = PortfolioPosition(symbol)
                             ref_price= self.__extract_value_from_df__(symbol_df, "date", day["date"], symbol)
                             curr_portf_pos.open_pos(day["Prediction"],day["date"],ref_price)
                             last_side=day["Prediction"]
@@ -444,7 +444,7 @@ class MLModelAnalyzer():
                             if curr_portf_pos is not None:
 
                                 #2- Open the new one
-                                curr_portf_pos=PortfoliioPosition(symbol)
+                                curr_portf_pos=PortfolioPosition(symbol)
                                 ref_price = self.__extract_value_from_df__(symbol_df, "date", day["date"], symbol)
                                 curr_portf_pos.open_pos(day["Prediction"],day["date"],ref_price)
                                 last_side=day["Prediction"]

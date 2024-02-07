@@ -9,12 +9,13 @@ _DATE_FORMAT="%m/%d/%Y"
 
 def show_commands():
 
-    print("#1-EvaluateAlgos [SeriesCSV]")
+    print("#1-TrainAlgos [SeriesCSV]")
     print("#2-EvaluateAlgosLastModel [SeriesCSV] [from] [to]")
     print("#3-RunPredictionsLastModel [SeriesCSV] [from] [to]")
-    print("#4-EvalTradingPerformance [Symbol] [SeriesCSV] [from] [to] [Bias]")
+    print("#4-EvalBiasedTradingAlgo [Symbol] [SeriesCSV] [from] [to] [Bias]")
     print("#5-EvaluateARIMA [Symbol] [Period] [from] [to]")
     print("#6-PredictARIMA [Symbol] [p] [d] [q] [from] [to] [Period] [Step]")
+    print("#7-EvalSingleIndicatorAlgo [Symbol] [indicator] [from] [to] [inverted]")
 
     print("#n-Exit")
 
@@ -23,7 +24,7 @@ def params_validation(cmd,param_list,exp_len):
         raise Exception("Command {} expects {} parameters".format(cmd,exp_len))
 
 
-def process_evaluate_algos(cmd_param_list,str_from,str_to):
+def process_train_algos(cmd_param_list,str_from,str_to):
     loader=SettingsLoader()
     logger=Logger()
     try:
@@ -59,7 +60,7 @@ def process_evaluate_algos_last_model(cmd_param_list,str_from,str_to):
 
 
 
-def process_eval_trading_performance(symbol, cmd_series_csv,str_from,str_to,bias):
+def process_biased_trading_algo(symbol, cmd_series_csv,str_from,str_to,bias):
     loader = SettingsLoader()
     logger = Logger()
     try:
@@ -139,6 +140,32 @@ def process_eval_ARIMA(symbol,period, str_from,str_to):
     except Exception as e:
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
 
+        # [Symbol] [indicator] [from] [to] [inverted]
+def process_eval_single_indicator_algo(symbol,indicator,str_from,str_to,inverted):
+    loader = SettingsLoader()
+    logger = Logger()
+    try:
+        logger.print("Evaluating Single Indicator Algo for {} from {} to {}".format(symbol, str_from, str_to), MessageType.INFO)
+
+        config_settings = loader.load_settings("./configs/commands_mgr.ini")
+
+        dataMgm = DataManagement(config_settings["hist_data_conn_str"], config_settings["ml_reports_conn_str"],
+                                 config_settings["classification_map_key"], logger)
+        portf_summary = dataMgm.eval_singe_indicator_algo(symbol,indicator,inverted=="True",
+                                       DateHandler.convert_str_date(str_from, _DATE_FORMAT),
+                                       DateHandler.convert_str_date(str_to, _DATE_FORMAT))
+
+
+        print("============= Displaying porftolio status for symbol {} =============".format(symbol))
+        print("From={} To={}".format(str_from,str_to))
+        print("Nom. Profit={}".format(portf_summary.calculate_th_nom_profit()))
+        print("Pos. Size={}".format(portf_summary.portf_pos_size))
+        pass
+
+    except Exception as e:
+        logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
+
+
 def process_predict_ARIMA(symbol, p,d,q, str_from,str_to,period,step):
     loader = SettingsLoader()
     logger = Logger()
@@ -169,19 +196,20 @@ def process_commands(cmd):
 
     cmd_param_list=cmd.split(" ")
 
-    if cmd_param_list[0]=="EvaluateAlgos":
-        params_validation("EvaluateAlgos", cmd_param_list, 4)
-        process_evaluate_algos(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3])
-        #EvaluateAlgosLastModel
+    if cmd_param_list[0]=="TrainAlgos":
+        params_validation("TrainAlgos", cmd_param_list, 4)
+        process_train_algos(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3])
+
     elif cmd_param_list[0]=="EvaluateAlgosLastModel":
         params_validation("EvaluateAlgosLastModel", cmd_param_list, 4)
         process_evaluate_algos_last_model(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3])
     elif cmd_param_list[0]=="RunPredictionsLastModel":
         params_validation("RunPredictionsLastModel", cmd_param_list, 4)
         process_run_preductions_last_model( cmd_param_list[1], cmd_param_list[2], cmd_param_list[3])
-    elif cmd_param_list[0]=="EvalTradingPerformance":
-        params_validation("EvalTradingPerformance", cmd_param_list, 6)
-        process_eval_trading_performance( cmd_param_list[1], cmd_param_list[2], cmd_param_list[3], cmd_param_list[4], cmd_param_list[5])
+    elif cmd_param_list[0]=="EvalBiasedTradingAlgo":
+        params_validation("EvalBiasedTradingAlgo", cmd_param_list, 6)
+        process_biased_trading_algo(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3], cmd_param_list[4],
+                                    cmd_param_list[5])
     elif cmd_param_list[0] == "EvaluateARIMA":
         params_validation("EvaluateARIMA", cmd_param_list, 5)
         process_eval_ARIMA(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3], cmd_param_list[4])
@@ -189,6 +217,14 @@ def process_commands(cmd):
         params_validation("PredictARIMA", cmd_param_list, 9)
         process_predict_ARIMA(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3], cmd_param_list[4],
                               cmd_param_list[5], cmd_param_list[6], cmd_param_list[7], cmd_param_list[8])
+    elif cmd_param_list[0] == "EvalSingleIndicatorAlgo":
+        params_validation("EvalSingleIndicatorAlgo", cmd_param_list, 6)
+        process_eval_single_indicator_algo(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3], cmd_param_list[4],
+                                            cmd_param_list[5])
+
+
+
+
 
 
     else:

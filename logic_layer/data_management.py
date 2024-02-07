@@ -1,3 +1,4 @@
+import traceback
 from datetime import timedelta
 
 from data_access_layer.date_range_classification_manager import DateRangeClassificationManager
@@ -6,8 +7,9 @@ from data_access_layer.economic_series_manager import EconomicSeriesManager
 from framework.common.logger.message_type import MessageType
 from logic_layer.ARIMA_models_analyzer import ARIMAModelsAnalyzer
 from logic_layer.data_set_builder import DataSetBuilder
+from logic_layer.indicator_based_trading_backtester import IndicatorBasedTradingBacktester
 from logic_layer.ml_models_analyzer import MLModelAnalyzer
-
+import pandas as pd
 
 class DataManagement:
 
@@ -16,6 +18,8 @@ class DataManagement:
         self.logger=logger
 
         self.data_set_builder=DataSetBuilder(hist_data_conn_str,ml_reports_conn_str,p_classification_map_key,logger)
+
+        self.date_range_classif_mgr = DateRangeClassificationManager(ml_reports_conn_str)
 
 
     def evaluate_algorithms_performance(self,series_csv,d_from,d_to):
@@ -67,6 +71,26 @@ class DataManagement:
 
         except Exception as e:
             msg = "CRITICAL ERROR processing model @build_ARIMA:{}".format(str(e))
+            self.logger.do_log(msg, MessageType.ERROR)
+            raise Exception(msg)
+
+    def eval_singe_indicator_algo(self,symbol,indicator, inv, d_from, d_to):
+        try:
+            series_df = self.data_set_builder.build_series(symbol, d_from, d_to, add_classif_col=False)
+
+            indic_classif_list = self.date_range_classif_mgr.get_date_range_classification_values(indicator,d_from,d_to)
+            indic_classif_df = pd.DataFrame([vars(classif) for classif in indic_classif_list])
+
+            backtester = IndicatorBasedTradingBacktester()
+
+            return backtester.backtest_indicator_based_strategy(symbol,series_df,indic_classif_df,inv)
+
+        except Exception as e:
+            # Obtiene la pila de llamadas
+            tb = traceback.extract_tb(e.__traceback__)
+            # Obtiene la última línea de la pila de llamadas
+            file_name, line_number, func_name, line_code = tb[-1]
+            msg = "CRITICAL ERROR processing model @eval_singe_indicator_algo:{}".format(str(e))
             self.logger.do_log(msg, MessageType.ERROR)
             raise Exception(msg)
 

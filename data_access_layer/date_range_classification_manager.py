@@ -26,11 +26,11 @@ class DateRangeClassificationManager:
 
         return date_range_classif
 
-    def get_date_range_classification_values(self, key):
+    def get_date_range_classification_values(self, key, d_from=None, d_to=None):
         date_range_values = []
         with self.connection.cursor() as cursor:
-            params = (key)
-            cursor.execute("{CALL GetDateRangeClassifications (?)}", params)
+            params = (key,d_from,d_to)
+            cursor.execute("{CALL GetDateRangeClassifications (?,?,?)}", params)
 
             for row in cursor:
                 date_range_value = None
@@ -38,3 +38,6 @@ class DateRangeClassificationManager:
                 date_range_values.append(date_range_value)
 
         return date_range_values
+
+
+
