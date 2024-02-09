@@ -74,19 +74,16 @@ class DataManagement:
             self.logger.do_log(msg, MessageType.ERROR)
             raise Exception(msg)
 
-    def eval_singe_indicator_algo(self,symbol,seriesCSV,indicator, inv, d_from, d_to):
+    def eval_singe_indicator_algo(self,symbol,indicator, inv, d_from, d_to):
         try:
             series_df = self.data_set_builder.build_series(symbol, d_from, d_to, add_classif_col=False)
 
             indic_classif_list = self.date_range_classif_mgr.get_date_range_classification_values(indicator,d_from,d_to)
             indic_classif_df = pd.DataFrame([vars(classif) for classif in indic_classif_list])
 
-            backtester = MLModelAnalyzer()
+            backtester = IndicatorBasedTradingBacktester()
+            return backtester.backtest_indicator_based_strategy(symbol,series_df,indic_classif_df,inv)
 
-
-
-            #return backtester.backtest_indicator_based_strategy(symbol,series_df,indic_classif_df,inv)
-            return  None
 
         except Exception as e:
             # Obtiene la pila de llamadas

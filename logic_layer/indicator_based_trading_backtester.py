@@ -1,7 +1,7 @@
 from business_entities.porft_summary import PortfSummary
 from business_entities.portf_position import PortfolioPosition
 from business_entities.portf_position_summary import PortfPositionSummary
-
+import numpy as np
 
 class IndicatorBasedTradingBacktester:
 
@@ -78,14 +78,26 @@ class IndicatorBasedTradingBacktester:
     def __find_classif_in_date__(self,indic_classif_df,date,classif_col):
         bias_record_index = (indic_classif_df['date_start'] <= date) & (indic_classif_df['date_end'] >= date)
         biased_record = indic_classif_df[bias_record_index]
-        return  biased_record.iloc[0][classif_col]
+        if biased_record.empty:
+            return None
+        else:
+            return biased_record.iloc[0][classif_col]
 
     def __open_pos__(self,symbol,side,open_date,open_price):
+
+        if  np.isnan(open_price) or open_price is None:
+            raise Exception("Could not find a valid price for symbol {} on date {}".format(symbol,open_date))
+
         open_pos = PortfolioPosition(symbol)
         open_pos.open_pos(side, open_date, open_price)
         return open_pos
 
     def __close_pos__(self,curr_portf_pos,date,close_price):
+
+
+        if  np.isnan(close_price) or close_price is None:
+            raise Exception("Could not find a valid price for symbol {} on date {}".format(curr_portf_pos.symbol,date))
+
         curr_portf_pos.close_pos(date, close_price)
 
     #NOTE:   Indicator based strategies consdier that the same price is used to close and open the next pos
