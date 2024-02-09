@@ -415,11 +415,11 @@ class MLModelAnalyzer():
 
         portf_pos_dict={}
 
-        for key in predictions_dic.keys():
+        for algo in predictions_dic.keys():
             curr_portf_pos=None
             last_side=None
             portf_pos = []
-            predictions_df=predictions_dic[key]
+            predictions_df=predictions_dic[algo]
 
             for index,day in predictions_df.iterrows():
 
@@ -452,19 +452,22 @@ class MLModelAnalyzer():
                             curr_portf_pos=None
                             last_side=None
                 except Exception as e:
-                    raise Exception("Error processing day {} for algo {}".format(day["date"],key))
+                    raise Exception("Error processing day {} for algo {}".format(day["date"], algo))
 
             #We add the last position
             if curr_portf_pos is not None:
-                last_day=predictions_dic[key].iloc[-1]
+                last_day=predictions_dic[algo].iloc[-1]
                 ref_price = self.__extract_value_from_df__(symbol_df, "date", last_day["date"], symbol)
                 curr_portf_pos.close_pos(last_day["date"],ref_price)
                 portf_pos.append(curr_portf_pos)
 
-            portf_pos_dict[key]=portf_pos
+            portf_pos_dict[algo]=portf_pos
 
 
         return  portf_pos_dict
+
+
+
 
 
 

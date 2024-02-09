@@ -33,6 +33,14 @@ class IndicatorBasedTradingBacktester:
         else:
             raise Exception("Invalid side switching sides! : {}".format(side))
 
+    def __eval_invert_side__(self,side,invert):
+
+        if invert:
+            return  self.__switch_side__(side)
+        else:
+            return side
+
+
     def __get_date_price__(self,series_df,symbol,date):
 
 
@@ -60,6 +68,26 @@ class IndicatorBasedTradingBacktester:
 
         return summary
 
+
+    def __same_side_pred__(self, pred,bias):
+        return  pred==bias
+
+    def __closing_divirgence__ (self,side,pred,bias):
+        return  not (side==pred and pred==bias)
+
+    def __find_classif_in_date__(self,indic_classif_df,date,classif_col):
+        bias_record_index = (indic_classif_df['date_start'] <= date) & (indic_classif_df['date_end'] >= date)
+        biased_record = indic_classif_df[bias_record_index]
+        return  biased_record.iloc[0][classif_col]
+
+    def __open_pos__(self,symbol,side,open_date,open_price):
+        open_pos = PortfolioPosition(symbol)
+        open_pos.open_pos(side, open_date, open_price)
+        return open_pos
+
+    def __close_pos__(self,curr_portf_pos,date,close_price):
+        curr_portf_pos.close_pos(date, close_price)
+
     #NOTE:   Indicator based strategies consdier that the same price is used to close and open the next pos
     #This means. If closing a LONG position at 300.21, the system assumes that closing at 300.21 and goes SHORT at the same price
     def backtest_indicator_based_strategy(self,symbol,symbol_df,indic_classif_df,inv):
@@ -85,6 +113,57 @@ class IndicatorBasedTradingBacktester:
 
 
         return self.__calculate_portfolio_performance__(symbol,portf_positions_arr)
+
+    #tihs does not train anything Just uses the last trained indicator
+    def backtest_ML_indicator_biased_strategy(self,symbol,series_df,indic_classif_df,inverted,predictions_dict):
+        portf_positions_arr = {}
+
+        for algo in predictions_dict.keys():
+
+            curr_portf_pos = None
+            portf_pos = []
+            predictions_df = predictions_dict[algo]
+            last_date=None
+            last_price=None
+
+            for index,day in predictions_df.iterrows():
+
+                try:
+                    date = day["date"]
+                    last_date=date
+                    ml_pred= self.__eval_invert_side__( day["Prediction"],inverted)
+                    classif_pred=self.__find_classif_in_date__(indic_classif_df,date,"classification")
+                    symbol_price= self.__get_date_price__(series_df, symbol, date)
+                    last_price=symbol_price
+
+                    if curr_portf_pos is None: #we are flat
+                        if self.__same_side_pred__(ml_pred,classif_pred):
+                            curr_portf_pos=self.__open_pos__(symbol,ml_pred,date,symbol_price)
+                            portf_pos.append(curr_portf_pos)
+
+
+                    elif curr_portf_pos is not None and self.__closing_divirgence__(curr_portf_pos.side,ml_pred,classif_pred):
+                        self.__close_pos__(curr_portf_pos,date,symbol_price)
+                        curr_portf_pos=None
+
+                        if self.__same_side_pred__(ml_pred, classif_pred):#We see if we have to re open the pos
+                            curr_portf_pos = self.__open_pos__(symbol, ml_pred, date, symbol_price)
+                            portf_pos.append(curr_portf_pos)
+
+                    else:
+                        pass
+
+                except Exception as e:
+                    raise Exception("Error processing day {} for algo {}".format(day["date"], algo))
+
+            if(curr_portf_pos is not None and curr_portf_pos.is_open()):
+                self.__close_pos__(curr_portf_pos, last_date, last_price)
+
+            portf_positions_arr[algo]=self.__calculate_portfolio_performance__(symbol,portf_pos)
+
+
+
+        return  portf_positions_arr
 
 
 

@@ -16,6 +16,7 @@ def show_commands():
     print("#5-EvaluateARIMA [Symbol] [Period] [from] [to]")
     print("#6-PredictARIMA [Symbol] [p] [d] [q] [from] [to] [Period] [Step]")
     print("#7-EvalSingleIndicatorAlgo [Symbol] [indicator] [from] [to] [inverted]")
+    print("#8-EvalMLBiasedAlgo [Symbol] [indicator] [SeriesCSV] [from] [to] [inverted]")
 
     print("#n-Exit")
 
@@ -165,6 +166,33 @@ def process_eval_single_indicator_algo(symbol,indicator,str_from,str_to,inverted
     except Exception as e:
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
 
+def process_eval_ml_biased_algo(symbol, indicator,seriesCSV,str_from,str_to,inverted):
+    loader = SettingsLoader()
+    logger = Logger()
+    try:
+        logger.print("Evaluating ML biasde algo for {} from {} to {}".format(symbol, str_from, str_to),
+                     MessageType.INFO)
+
+        config_settings = loader.load_settings("./configs/commands_mgr.ini")
+
+        dataMgm = DataManagement(config_settings["hist_data_conn_str"], config_settings["ml_reports_conn_str"],
+                                 config_settings["classification_map_key"], logger)
+        portf_summary_dict = dataMgm.eval_ml_biased_algo(symbol,indicator,seriesCSV,
+                                                          DateHandler.convert_str_date(str_from, _DATE_FORMAT),
+                                                          DateHandler.convert_str_date(str_to, _DATE_FORMAT),
+                                                          inverted == "True")
+
+        for algo in portf_summary_dict.keys():
+            portf_summary=portf_summary_dict[algo]
+            print("============= Displaying porftolio status for symbol {} w/Algo {} =============".format(symbol,algo))
+            print("From={} To={}".format(str_from, str_to))
+            print("Nom. Profit={}".format(portf_summary.calculate_th_nom_profit()))
+            print("Pos. Size={}".format(portf_summary.portf_pos_size))
+            print( "============= =============")
+
+    except Exception as e:
+        logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
+
 
 def process_predict_ARIMA(symbol, p,d,q, str_from,str_to,period,step):
     loader = SettingsLoader()
@@ -221,6 +249,10 @@ def process_commands(cmd):
         params_validation("EvalSingleIndicatorAlgo", cmd_param_list, 6)
         process_eval_single_indicator_algo(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3], cmd_param_list[4],
                                             cmd_param_list[5])
+    elif cmd_param_list[0] == "EvalMLBiasedAlgo":
+        params_validation("EvalMLBiasedAlgo", cmd_param_list, 7)
+        process_eval_ml_biased_algo(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3], cmd_param_list[4],
+                                            cmd_param_list[5],cmd_param_list[6])
 
 
 

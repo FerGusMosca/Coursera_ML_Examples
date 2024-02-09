@@ -27,6 +27,9 @@ class PortfolioPosition():
         self.date_close=date
         self.price_close=float(price)
 
+    def is_open(self):
+        return self.date_close is None
+
 
     def calculate_pct_profit(self):
         if self.price_close is not None and self.price_open is not None:

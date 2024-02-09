@@ -74,16 +74,19 @@ class DataManagement:
             self.logger.do_log(msg, MessageType.ERROR)
             raise Exception(msg)
 
-    def eval_singe_indicator_algo(self,symbol,indicator, inv, d_from, d_to):
+    def eval_singe_indicator_algo(self,symbol,seriesCSV,indicator, inv, d_from, d_to):
         try:
             series_df = self.data_set_builder.build_series(symbol, d_from, d_to, add_classif_col=False)
 
             indic_classif_list = self.date_range_classif_mgr.get_date_range_classification_values(indicator,d_from,d_to)
             indic_classif_df = pd.DataFrame([vars(classif) for classif in indic_classif_list])
 
-            backtester = IndicatorBasedTradingBacktester()
+            backtester = MLModelAnalyzer()
 
-            return backtester.backtest_indicator_based_strategy(symbol,series_df,indic_classif_df,inv)
+
+
+            #return backtester.backtest_indicator_based_strategy(symbol,series_df,indic_classif_df,inv)
+            return  None
 
         except Exception as e:
             # Obtiene la pila de llamadas
@@ -94,6 +97,30 @@ class DataManagement:
             self.logger.do_log(msg, MessageType.ERROR)
             raise Exception(msg)
 
+    def eval_ml_biased_algo(self,symbol, indicator,seriesCSV,d_from,d_to,inverted):
+        try:
+            series_df = self.data_set_builder.build_series(seriesCSV, d_from, d_to, add_classif_col=False)
+
+            indic_classif_list = self.date_range_classif_mgr.get_date_range_classification_values(indicator, d_from,
+                                                                                                  d_to)
+            indic_classif_df = pd.DataFrame([vars(classif) for classif in indic_classif_list])
+
+            mlAnalyzer = MLModelAnalyzer(self.logger)
+
+            pred_dict = mlAnalyzer.run_predictions_last_model(series_df)
+
+            backtester = IndicatorBasedTradingBacktester()
+
+            return backtester.backtest_ML_indicator_biased_strategy(symbol,series_df,indic_classif_df,inverted,pred_dict)
+
+        except Exception as e:
+            # Obtiene la pila de llamadas
+            tb = traceback.extract_tb(e.__traceback__)
+            # Obtiene la última línea de la pila de llamadas
+            file_name, line_number, func_name, line_code = tb[-1]
+            msg = "CRITICAL ERROR processing model @eval_ml_biased_algo:{}".format(str(e))
+            self.logger.do_log(msg, MessageType.ERROR)
+            raise Exception(msg)
 
     def predict_ARIMA(self,symbol, p,d,q,d_from,d_to,period, steps):
         try:
