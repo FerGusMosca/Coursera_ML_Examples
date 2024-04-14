@@ -42,7 +42,16 @@ class DataManagement:
             series_df = self.data_set_builder.build_series(series_csv, d_from, d_to)
             mlAnalyzer = MLModelAnalyzer(self.logger)
             portf_pos_dict = mlAnalyzer.evaluate_trading_performance_last_model(symbol_df,symbol,series_df, bias)
-            return portf_pos_dict
+
+            backtester=IndicatorBasedTradingBacktester()
+
+            summary_dict={}
+            for algo in portf_pos_dict.keys():
+                port_positions_arr=portf_pos_dict[algo]
+                summary= backtester.calculate_portfolio_performance(symbol,port_positions_arr)
+                summary_dict[algo]=summary
+
+            return summary_dict
 
         except Exception as e:
             msg = "CRITICAL ERROR processing model @evaluate_trading_performance:{}".format(str(e))

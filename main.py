@@ -21,6 +21,7 @@ from test_algorithms.ARIMA_tests import ARIMATests
 from test_algorithms.decission_tree_test import DecissionTreeTest
 from test_algorithms.k_means_test import KMeansTest
 from test_algorithms.k_nearest_test import KNearestTest
+from test_algorithms.libraries.numpy_test import NumpyTest
 from test_algorithms.logistic_regression_test import LogisticRegressionTest
 from test_algorithms.support_vector_machine_test import SupportVectorMachineTest
 from util.file_downloader import FileDownloader
@@ -138,6 +139,12 @@ def exam_5_stocks_analysis():
 def ARIMA_tests():
     ARIMATests.test_stock_predictions()
 
+
+def NumPy_tests():
+    #NumpyTest.vectorize_array_test()
+    #NumpyTest.normalize_rows_test()
+    NumpyTest.softmax_test()
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
@@ -151,7 +158,8 @@ if __name__ == '__main__':
     #course_10_week_1_practice()
     #exam_10_presentation_calculations()
     #exam_5_stocks_analysis()
-    ARIMA_tests()
+    #ARIMA_tests()
+    NumPy_tests()
     raw_input("Press Enter to continue...")
 
 

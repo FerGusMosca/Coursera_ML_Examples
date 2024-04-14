@@ -71,18 +71,17 @@ def process_biased_trading_algo(symbol, cmd_series_csv,str_from,str_to,bias):
 
         dataMgm = DataManagement(config_settings["hist_data_conn_str"], config_settings["ml_reports_conn_str"],
                                  config_settings["classification_map_key"], logger)
-        portf_pos_dict = dataMgm.evaluate_trading_performance(symbol,cmd_series_csv,
+        summary_dict = dataMgm.evaluate_trading_performance(symbol,cmd_series_csv,
                                                        DateHandler.convert_str_date(str_from, _DATE_FORMAT),
                                                        DateHandler.convert_str_date(str_to, _DATE_FORMAT),bias)
         print("Displaying all the different models predictions for the different alogs:")
 
-        for key in portf_pos_dict.keys():
+        for key in summary_dict.keys():
             print("============{}============ for {}".format(key,symbol))
-            trades_col=portf_pos_dict[key]
-            for trade in trades_col:
-                print(" ==> Side={} Open_Price={} Open Date={} Close_Price={} Close Date={} Pct. Profit={} Nom. Th. Profit={}"
-                      .format(trade.side, trade.price_open,trade.date_open, trade.price_close,trade.date_close, trade.calculate_pct_profit(),
-                              trade.calculate_th_nom_profit()))
+            summary=summary_dict[key]
+            print("From={} To={}".format(str_from, str_to))
+            print("Nom. Profit={}".format(summary.calculate_th_nom_profit()))
+            print("Pos. Size={}".format(summary.portf_pos_size))
 
 
     except Exception as e:

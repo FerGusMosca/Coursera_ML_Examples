@@ -55,7 +55,7 @@ class IndicatorBasedTradingBacktester:
         except Exception as e:
             raise Exception("Could not find a price for symbol {} and date {}  on series_df!!!".format(symbol,date))
 
-    def __calculate_portfolio_performance__(self,symbol,portf_positions_arr):
+    def calculate_portfolio_performance(self,symbol,portf_positions_arr):
 
         summary=PortfSummary(symbol,PortfolioPosition._DEF_PORTF_AMT)
 
@@ -124,7 +124,7 @@ class IndicatorBasedTradingBacktester:
             last_pos.open_pos(side, close_date, close_price)
 
 
-        return self.__calculate_portfolio_performance__(symbol,portf_positions_arr)
+        return self.calculate_portfolio_performance(symbol, portf_positions_arr)
 
     #tihs does not train anything Just uses the last trained indicator
     def backtest_ML_indicator_biased_strategy(self,symbol,series_df,indic_classif_df,inverted,predictions_dict):
@@ -171,11 +171,12 @@ class IndicatorBasedTradingBacktester:
             if(curr_portf_pos is not None and curr_portf_pos.is_open()):
                 self.__close_pos__(curr_portf_pos, last_date, last_price)
 
-            portf_positions_arr[algo]=self.__calculate_portfolio_performance__(symbol,portf_pos)
+            portf_positions_arr[algo]= self.calculate_portfolio_performance(symbol, portf_pos)
 
 
 
         return  portf_positions_arr
+
 
 
 
