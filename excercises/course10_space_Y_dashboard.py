@@ -4,7 +4,7 @@ import dash_html_components as html
 import dash_core_components as dcc
 from dash.dependencies import Input,Output
 import plotly.express as px
-from exams.exam10_presentation_calculations import Exam10PresentationCalculations
+from exams.data_science_IBM_cert.exams.exam10_presentation_calculations import Exam10PresentationCalculations
 
 
 class Course10SpaceYDashboard:

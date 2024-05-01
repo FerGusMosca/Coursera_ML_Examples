@@ -4,19 +4,13 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 from pip._vendor.distlib.compat import raw_input
 
-from classification.decission_tree import DecissionTree
-from classification.k_nearest_neighbour import KNearestNeighbour
-from exams.exam10_presentation_calculations import Exam10PresentationCalculations
-from exams.exam5_stocks_analysis import StocksAnalysisSummary
-from exams.exam_5_final_exam import Exam5FinalExam
-from exams.exam_8_dashboard import Module8Dashboard
-from exams.module_7_final_exam import Module7Exam
-from exams.module_8_final_exam import Module8Exam
-from excercises.course10_space_Y_dashboard import Course10SpaceYDashboard
-from excercises.course10_space_Y_data_visualization import Course10SpaceYDataVisualization
+from exams.data_science_IBM_cert.exams.exam10_presentation_calculations import Exam10PresentationCalculations
+from exams.data_science_IBM_cert.exams.exam_5_final_exam import Exam5FinalExam
+from exams.data_science_IBM_cert.exams.exam_8_dashboard import Module8Dashboard
+from exams.data_science_IBM_cert.exams.module_7_final_exam import Module7Exam
+from exams.deep_learning_specialization.neural_networks_week2_test import NeuralNetworksWeek2Test
+from exams.hidden_road_test.hidden_road_test import HiddenRoadTest
 from excercises.course10_space_y_machine_learning_algorithms_comparisson import Course10SpaceYMachineLearningPrediction
-from excercises.course_10_space_Y_data_collection_test import Course10SpaceYDataCollectionTest
-from excercises.course_10_space_Y_data_wrangling import Course10SpaceYDataWranglingTest
 from test_algorithms.ARIMA_tests import ARIMATests
 from test_algorithms.decission_tree_test import DecissionTreeTest
 from test_algorithms.k_means_test import KMeansTest
@@ -24,7 +18,6 @@ from test_algorithms.k_nearest_test import KNearestTest
 from test_algorithms.libraries.numpy_test import NumpyTest
 from test_algorithms.logistic_regression_test import LogisticRegressionTest
 from test_algorithms.support_vector_machine_test import SupportVectorMachineTest
-from util.file_downloader import FileDownloader
 
 
 def print_hi(name):
@@ -143,7 +136,13 @@ def ARIMA_tests():
 def NumPy_tests():
     #NumpyTest.vectorize_array_test()
     #NumpyTest.normalize_rows_test()
-    NumpyTest.softmax_test()
+    #NumpyTest.softmax_test()
+    NeuralNetworksWeek2Test.test()
+
+def HiddenRoadTestStart():
+    HiddenRoadTest.test()
+
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -159,7 +158,8 @@ if __name__ == '__main__':
     #exam_10_presentation_calculations()
     #exam_5_stocks_analysis()
     #ARIMA_tests()
-    NumPy_tests()
+    #NumPy_tests
+    HiddenRoadTestStart()
     raw_input("Press Enter to continue...")
 
 

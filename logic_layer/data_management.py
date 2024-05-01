@@ -22,7 +22,7 @@ class DataManagement:
         self.date_range_classif_mgr = DateRangeClassificationManager(ml_reports_conn_str)
 
 
-    def evaluate_algorithms_performance(self,series_csv,d_from,d_to):
+    def train_algos(self,series_csv,d_from,d_to):
 
         try:
             series_df=self.data_set_builder.build_series(series_csv,d_from,d_to)
@@ -31,17 +31,17 @@ class DataManagement:
             return comp_df
 
         except Exception as e:
-            msg="CRITICAL ERROR processing model @evaluate_algorithms_performance:{}".format(str(e))
+            msg="CRITICAL ERROR processing model @train_algos:{}".format(str(e))
             self.logger.do_log(msg,MessageType.ERROR)
             raise Exception(msg)
 
-    def evaluate_trading_performance(self,symbol,series_csv,d_from,d_to,bias):
+    def evaluate_trading_performance(self,symbol,series_csv,d_from,d_to,bias,last_trading_dict=None):
 
         try:
             symbol_df = self.data_set_builder.build_series(symbol,d_from,d_to)
             series_df = self.data_set_builder.build_series(series_csv, d_from, d_to)
             mlAnalyzer = MLModelAnalyzer(self.logger)
-            portf_pos_dict = mlAnalyzer.evaluate_trading_performance_last_model(symbol_df,symbol,series_df, bias)
+            portf_pos_dict = mlAnalyzer.evaluate_trading_performance_last_model(symbol_df,symbol,series_df, bias,last_trading_dict)
 
             backtester=IndicatorBasedTradingBacktester()
 

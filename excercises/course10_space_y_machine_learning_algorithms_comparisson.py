@@ -1,5 +1,4 @@
 # Pandas is a software library written for the Python programming language for data manipulation and analysis.
-import pandas as pd
 # NumPy is a library for the Python programming language, adding support for large, multi-dimensional arrays and matrices, along with a large collection of high-level mathematical functions to operate on these arrays
 import numpy as np
 # Matplotlib is a plotting library for python and pyplot gives us a MatLab like plotting framework. We will use this in our plotter function to plot data.
@@ -21,9 +20,7 @@ from sklearn.tree import DecisionTreeClassifier
 # K Nearest Neighbors classification algorithm
 from sklearn.neighbors import KNeighborsClassifier
 
-from exams.exam10_presentation_calculations import Exam10PresentationCalculations
-from service_layer.launches_service_client import LaunchesServiceClient
-from test_algorithms.support_vector_machine_test import SupportVectorMachineTest
+from exams.data_science_IBM_cert.exams.exam10_presentation_calculations import Exam10PresentationCalculations
 import plotly.express as px
 import pandas as pd
 

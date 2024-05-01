@@ -7,10 +7,12 @@ from IPython.display import display
 import pandas as pd
 _DATE_FORMAT="%m/%d/%Y"
 
+
+last_trading_dict=None
+
 def show_commands():
 
-    print("#1-TrainAlgos [SeriesCSV]")
-    print("#2-EvaluateAlgosLastModel [SeriesCSV] [from] [to]")
+    print("#1-TrainAlgos [SeriesCSV] [from] [to]")
     print("#3-RunPredictionsLastModel [SeriesCSV] [from] [to]")
     print("#4-EvalBiasedTradingAlgo [Symbol] [SeriesCSV] [from] [to] [Bias]")
     print("#5-EvaluateARIMA [Symbol] [Period] [from] [to]")
@@ -35,36 +37,17 @@ def process_train_algos(cmd_param_list,str_from,str_to):
 
         dataMgm= DataManagement(config_settings["hist_data_conn_str"],config_settings["ml_reports_conn_str"],
                                 config_settings["classification_map_key"], logger)
-        dataMgm.evaluate_algorithms_performance(cmd_param_list, DateHandler.convert_str_date(str_from, _DATE_FORMAT),
-                                                DateHandler.convert_str_date(str_to, _DATE_FORMAT))
+        dataMgm.train_algos(cmd_param_list, DateHandler.convert_str_date(str_from, _DATE_FORMAT),
+                            DateHandler.convert_str_date(str_to, _DATE_FORMAT))
 
     except Exception as e:
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)),MessageType.ERROR)
-
-
-def process_evaluate_algos_last_model(cmd_param_list,str_from,str_to):
-    loader=SettingsLoader()
-    logger=Logger()
-    try:
-        logger.print("Initializing dataframe creation for series : {}".format(cmd_param_list[1]),MessageType.INFO)
-
-        config_settings=loader.load_settings("./configs/commands_mgr.ini")
-
-        dataMgm= DataManagement(config_settings["hist_data_conn_str"],config_settings["ml_reports_conn_str"],
-                                config_settings["classification_map_key"], logger)
-        comp_df=dataMgm.evaluate_algorithms_performance_last_model(cmd_param_list, DateHandler.convert_str_date(str_from, _DATE_FORMAT),
-                                                DateHandler.convert_str_date(str_to, _DATE_FORMAT))
-        print("Displaying all the different models performance:")
-        display(comp_df)
-    except Exception as e:
-        logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)),MessageType.ERROR)
-
-
 
 def process_biased_trading_algo(symbol, cmd_series_csv,str_from,str_to,bias):
     loader = SettingsLoader()
     logger = Logger()
     try:
+        global last_trading_dict
         logger.print("Evaluating trading performance for symbol from last model from {} to {}".format(str_from, str_to), MessageType.INFO)
 
         config_settings = loader.load_settings("./configs/commands_mgr.ini")
@@ -73,7 +56,11 @@ def process_biased_trading_algo(symbol, cmd_series_csv,str_from,str_to,bias):
                                  config_settings["classification_map_key"], logger)
         summary_dict = dataMgm.evaluate_trading_performance(symbol,cmd_series_csv,
                                                        DateHandler.convert_str_date(str_from, _DATE_FORMAT),
-                                                       DateHandler.convert_str_date(str_to, _DATE_FORMAT),bias)
+                                                       DateHandler.convert_str_date(str_to, _DATE_FORMAT),bias,
+                                                       last_trading_dict)
+
+        last_trading_dict=summary_dict
+
         print("Displaying all the different models predictions for the different alogs:")
 
         for key in summary_dict.keys():
@@ -227,9 +214,6 @@ def process_commands(cmd):
         params_validation("TrainAlgos", cmd_param_list, 4)
         process_train_algos(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3])
 
-    elif cmd_param_list[0]=="EvaluateAlgosLastModel":
-        params_validation("EvaluateAlgosLastModel", cmd_param_list, 4)
-        process_evaluate_algos_last_model(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3])
     elif cmd_param_list[0]=="RunPredictionsLastModel":
         params_validation("RunPredictionsLastModel", cmd_param_list, 4)
         process_run_preductions_last_model( cmd_param_list[1], cmd_param_list[2], cmd_param_list[3])
@@ -252,10 +236,6 @@ def process_commands(cmd):
         params_validation("EvalMLBiasedAlgo", cmd_param_list, 7)
         process_eval_ml_biased_algo(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3], cmd_param_list[4],
                                             cmd_param_list[5],cmd_param_list[6])
-
-
-
-
 
 
     else:

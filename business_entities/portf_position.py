@@ -50,6 +50,6 @@ class PortfolioPosition():
 
     def calculate_th_nom_profit(self,portf_amt=_DEF_PORTF_AMT):
         pct_profit=self.calculate_pct_profit()
-        return  (pct_profit/100)*portf_amt
+        return  round((pct_profit/100)*portf_amt)
 
 

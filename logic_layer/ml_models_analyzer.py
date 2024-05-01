@@ -12,6 +12,7 @@ from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
 from business_entities.portf_position import PortfolioPosition
+from common.util.light_logger import LightLogger
 from framework.common.logger.message_type import MessageType
 # K Nearest Neighbors classification algorithm
 from sklearn.neighbors import KNeighborsClassifier
@@ -33,13 +34,24 @@ class MLModelAnalyzer():
     def __init__(self,p_logger):
         self.logger=p_logger
 
+    def __eval_exists_value_on_df__(self,panda_df,key,key_val,val_col):
+        if panda_df[key] is not None:
+            row_df= panda_df[panda_df[key]==key_val]
+
+            if row_df is not None and len(row_df)>0:
+                return  True
+            else:
+                return  False
+        else:
+            return  False
+
 
     def __extract_value_from_df__(self,panda_df,key,key_val,val_col ):
 
         if panda_df[key] is not None:
             row_df= panda_df[panda_df[key]==key_val]
 
-            if row_df is not None:
+            if row_df is not None and len(row_df)>0:
                 return  row_df[val_col]
             else:
                 raise Exception("Could not find column {} for a row with key value {}".format(val_col,key))
@@ -52,6 +64,34 @@ class MLModelAnalyzer():
         else:
             return side==bias
 
+
+    def __evaluate_consecutive_days__(self,day_1, day_2):
+
+        if abs((day_2 - day_1).days) == 1:
+            return True
+        else:
+            if (abs((day_2 - day_1).days) ==3) and day_1.weekday()==4 and day_2.weekday()==0 : #Friday To Monday
+                return  True
+            else:
+                return  False
+
+    def __eval_reuse_reference_price__(self,algo,last_trading_dict,side,new_date,new_ref_price):
+        try:
+            if(last_trading_dict is not None):
+                #1- We get the last trade of the algo
+                res = last_trading_dict[algo]
+
+                sorted_positions = sorted(res.portf_pos_summary, key=lambda x: x.portf_pos.date_close, reverse=True)
+
+                if sorted_positions is not None and len(sorted_positions)>0:
+                    last_pos = sorted_positions[0]
+                    if self.__evaluate_consecutive_days__(last_pos.portf_pos.date_close,new_date) and last_pos.portf_pos.side==side:
+                        #We have to consecutive days, we can use the old ref-price as opening price
+                        return last_pos.portf_pos.price_close
+        except Exception as e:
+            raise Exception("Error evaluating previous day for algo {} for date {}:{}".format( algo,new_date,str(e)))
+
+        return  new_ref_price
 
     def __map_num_to_cat_array__(self,y_hat_num,y_mapping):
         y_hat_cat=[]
@@ -410,7 +450,7 @@ class MLModelAnalyzer():
 
         return predictions_dict
 
-    def evaluate_trading_performance_last_model(self,symbol_df,symbol, series_df,bias):
+    def evaluate_trading_performance_last_model(self,symbol_df,symbol, series_df,bias,last_trading_dict=None):
         predictions_dic = self.run_predictions_last_model(series_df)
 
         portf_pos_dict={}
@@ -420,15 +460,24 @@ class MLModelAnalyzer():
             last_side=None
             portf_pos = []
             predictions_df=predictions_dic[algo]
+            LightLogger.do_log("----Processing algo {}".format(algo))
+
 
             for index,day in predictions_df.iterrows():
+
+                if not self.__eval_exists_value_on_df__(symbol_df, "date", day["date"], symbol):
+                    continue#We ignore days when we have no prices
 
                 try:
 
                     if curr_portf_pos is None and last_side is None:
                         if self.__validate_bias__(day["Prediction"],bias):
-                            curr_portf_pos = PortfolioPosition(symbol)
+
                             ref_price= self.__extract_value_from_df__(symbol_df, "date", day["date"], symbol)
+                            ref_price=self.__eval_reuse_reference_price__(algo, last_trading_dict, day["Prediction"], day["date"],ref_price)
+                            LightLogger.do_log("-Opening {} pos for ref_price= {} on {}".format(day["Prediction"],float(ref_price),day["date"].strftime("%Y-%m-%d")))
+                            curr_portf_pos = PortfolioPosition(symbol)
+
                             curr_portf_pos.open_pos(day["Prediction"],day["date"],ref_price)
                             last_side=day["Prediction"]
                     elif last_side != day["Prediction"]:#chage the side
@@ -436,6 +485,7 @@ class MLModelAnalyzer():
                         # 1- Close the old position
                         ref_price = self.__extract_value_from_df__(symbol_df, "date", day["date"], symbol)
                         curr_portf_pos.close_pos(day["date"], ref_price)
+                        LightLogger.do_log("-Closing {} pos for ref_price= {} on {} for pct profit={}% (nom. profit={})".format(curr_portf_pos.side, float(ref_price),day["date"].strftime("%Y-%m-%d"),curr_portf_pos.calculate_pct_profit(),curr_portf_pos.calculate_th_nom_profit()))
                         portf_pos.append(curr_portf_pos)
 
                         #2- Open the new one?
@@ -446,19 +496,21 @@ class MLModelAnalyzer():
                                 #2- Open the new one
                                 curr_portf_pos=PortfolioPosition(symbol)
                                 ref_price = self.__extract_value_from_df__(symbol_df, "date", day["date"], symbol)
+                                LightLogger.do_log("-Opening new {} pos for ref_price= {} on {}".format(day["Prediction"], float(ref_price),day["date"].strftime("%Y-%m-%d")))
                                 curr_portf_pos.open_pos(day["Prediction"],day["date"],ref_price)
                                 last_side=day["Prediction"]
                         else:#3-We go flat
                             curr_portf_pos=None
                             last_side=None
                 except Exception as e:
-                    raise Exception("Error processing day {} for algo {}".format(day["date"], algo))
+                    raise Exception("Error processing day {} for algo {}".format(day["date"].strftime("%Y-%m-%d"), algo))
 
             #We add the last position
             if curr_portf_pos is not None:
                 last_day=predictions_dic[algo].iloc[-1]
                 ref_price = self.__extract_value_from_df__(symbol_df, "date", last_day["date"], symbol)
-                curr_portf_pos.close_pos(last_day["date"],ref_price)
+                curr_portf_pos.close_pos(last_day["date"], ref_price)
+                LightLogger.do_log("-Closing last {} pos for ref_price= {} on {}  for pct profit={}% (nom. profit={})".format(curr_portf_pos.side, float(ref_price),last_day["date"].strftime("%Y-%m-%d"),curr_portf_pos.calculate_pct_profit(),curr_portf_pos.calculate_th_nom_profit()))
                 portf_pos.append(curr_portf_pos)
 
             portf_pos_dict[algo]=portf_pos
