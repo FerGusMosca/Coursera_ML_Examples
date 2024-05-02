@@ -4,6 +4,7 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 from pip._vendor.distlib.compat import raw_input
 
+from common.util.test_example_setting_loader import TestExampleSettingLoader
 from coursera_course_ML.exams.data_science_IBM_cert.exams.exam10_presentation_calculations import \
     Exam10PresentationCalculations
 from coursera_course_ML.exams.data_science_IBM_cert.exams.exam_5_final_exam import Exam5FinalExam
@@ -14,6 +15,7 @@ from coursera_course_ML.exams.hidden_road_test.hidden_road_test import HiddenRoa
 from coursera_course_ML.excercises.course10_space_y_machine_learning_algorithms_comparisson import Course10SpaceYMachineLearningPrediction
 from coursera_course_ML.test_algorithms.ARIMA_tests import ARIMATests
 from coursera_course_ML.test_algorithms.decission_tree_test import DecissionTreeTest
+from coursera_course_ML.test_algorithms.image_management import ImageManagement
 from coursera_course_ML.test_algorithms.k_means_test import KMeansTest
 from coursera_course_ML.test_algorithms.k_nearest_test import KNearestTest
 from coursera_course_ML.test_algorithms.logistic_regression_test import LogisticRegressionTest
@@ -143,13 +145,22 @@ def HiddenRoadTestStart():
     HiddenRoadTest.test()
 
 
+def image_management_tests():
+    config_loader=TestExampleSettingLoader()
+
+    settings=config_loader.load_settings("./configs/test_examples_mgr.ini")
+
+
+    ImageManagement.extract_image_test(settings)
+
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
     #k_nearest_tests()
     #decission_tree_tests()
-    logistic_regression_test()
+    #logistic_regression_test()
     #support_vector_machine_test()
     #k_means_test()
     #module7_test()
@@ -160,6 +171,7 @@ if __name__ == '__main__':
     #ARIMA_tests()
     #NumPy_tests
     #HiddenRoadTestStart()
+    image_management_tests()
     raw_input("Press Enter to continue...")
 
 

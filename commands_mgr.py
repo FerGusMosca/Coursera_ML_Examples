@@ -1,6 +1,6 @@
 from common.util.date_handler import DateHandler
 from common.util.logger import Logger
-from common.util.settings_loader import SettingsLoader
+from common.util.ml_settings_loader import MLSettingsLoader
 from framework.common.logger.message_type import MessageType
 from logic_layer.data_management import DataManagement
 from IPython.display import display
@@ -28,7 +28,7 @@ def params_validation(cmd,param_list,exp_len):
 
 
 def process_train_algos(cmd_param_list,str_from,str_to):
-    loader=SettingsLoader()
+    loader=MLSettingsLoader()
     logger=Logger()
     try:
         logger.print("Initializing dataframe creation for series : {}".format(cmd_param_list[1]),MessageType.INFO)
@@ -44,7 +44,7 @@ def process_train_algos(cmd_param_list,str_from,str_to):
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)),MessageType.ERROR)
 
 def process_biased_trading_algo(symbol, cmd_series_csv,str_from,str_to,bias):
-    loader = SettingsLoader()
+    loader = MLSettingsLoader()
     logger = Logger()
     try:
         global last_trading_dict
@@ -78,7 +78,7 @@ def process_biased_trading_algo(symbol, cmd_series_csv,str_from,str_to,bias):
 
 
 def process_run_preductions_last_model(cmd_param_list,str_from,str_to):
-    loader = SettingsLoader()
+    loader = MLSettingsLoader()
     logger = Logger()
     try:
         logger.print("Running predictions fro last model from {} to {}".format(str_from,str_to), MessageType.INFO)
@@ -104,7 +104,7 @@ def process_run_preductions_last_model(cmd_param_list,str_from,str_to):
 
 
 def process_eval_ARIMA(symbol,period, str_from,str_to):
-    loader = SettingsLoader()
+    loader = MLSettingsLoader()
     logger = Logger()
     try:
         logger.print("Building ARIMA model for {} (period {}) from {} to {}".format(symbol,period, str_from, str_to), MessageType.INFO)
@@ -129,7 +129,7 @@ def process_eval_ARIMA(symbol,period, str_from,str_to):
 
         # [Symbol] [indicator] [from] [to] [inverted]
 def process_eval_single_indicator_algo(symbol,indicator,str_from,str_to,inverted):
-    loader = SettingsLoader()
+    loader = MLSettingsLoader()
     logger = Logger()
     try:
         logger.print("Evaluating Single Indicator Algo for {} from {} to {}".format(symbol, str_from, str_to), MessageType.INFO)
@@ -153,7 +153,7 @@ def process_eval_single_indicator_algo(symbol,indicator,str_from,str_to,inverted
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
 
 def process_eval_ml_biased_algo(symbol, indicator,seriesCSV,str_from,str_to,inverted):
-    loader = SettingsLoader()
+    loader = MLSettingsLoader()
     logger = Logger()
     try:
         logger.print("Evaluating ML biasde algo for {} from {} to {}".format(symbol, str_from, str_to),
@@ -181,7 +181,7 @@ def process_eval_ml_biased_algo(symbol, indicator,seriesCSV,str_from,str_to,inve
 
 
 def process_predict_ARIMA(symbol, p,d,q, str_from,str_to,period,step):
-    loader = SettingsLoader()
+    loader = MLSettingsLoader()
     logger = Logger()
     try:
         logger.print("Predicting w/last built ARIMA model for {} (period {}) from {} to {}".format(symbol,period, str_from, str_to), MessageType.INFO)
