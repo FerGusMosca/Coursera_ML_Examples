@@ -10,6 +10,7 @@ from logic_layer.data_set_builder import DataSetBuilder
 from logic_layer.indicator_based_trading_backtester import IndicatorBasedTradingBacktester
 from logic_layer.ml_models_analyzer import MLModelAnalyzer
 import pandas as pd
+import numpy as np
 
 class DataManagement:
 

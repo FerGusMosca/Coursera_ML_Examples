@@ -65,6 +65,14 @@ class MLModelAnalyzer():
             return side==bias
 
 
+    def __val_invalid_values__(self,df):
+
+        #columns_with_inf = df.columns[df.isin([np.inf, -np.inf]).any()].tolist()
+        #columns_with_large_values = df.columns[(df.abs() > np.finfo(np.float64).max).any()].tolist()
+        #columns_with_nan = df.columns[df.isna().any()].tolist()
+        pass
+
+
     def __evaluate_consecutive_days__(self,day_1, day_2):
 
         if abs((day_2 - day_1).days) == 1:
@@ -165,7 +173,7 @@ class MLModelAnalyzer():
 
         X_train_num= self.__extract_non_numeric__(X_train)
 
-        parameters = {"C": [0.01, 0.1, 1], 'penalty': ['l2'], 'solver': ['lbfgs']}
+        parameters = {"C": [0.001, 0.01, 0.1, 1, 10, 100, 1000], 'penalty': ['l2'], 'solver': ['lbfgs']}
         lr = LogisticRegression()
         logreg_cv = GridSearchCV(lr, parameters)
         logreg_cv.fit(X_train_num, y_train)
@@ -360,8 +368,10 @@ class MLModelAnalyzer():
         #Then we normalize all the numerical values of X
         X= self.__normalize_X__(df_X)#we normalize X
 
+        self.__val_invalid_values__(X)
+
         #STEP 3 - Split the data into training and test
-        X_train, X_test, y_train, y_test =train_test_split(X, Y,test_size=0.2,random_state=2)
+        X_train, X_test, y_train, y_test =train_test_split(X, Y,test_size=0.05,random_state=2)
         X_train, X_test, y_train, y_test =self.__clean_NaN__(X_train,X_test,y_train,y_test)
 
         #LOGISTIC REGRESSION
@@ -369,8 +379,8 @@ class MLModelAnalyzer():
         comparisson_df=comparisson_df.append(resp_row, ignore_index=True)
 
         # SUPPORT VECTOR MACHINE
-        resp_row = self.run_support_vector_machine_eval(X_train, y_train, X_test, y_test,y_mapping)
-        comparisson_df = comparisson_df.append(resp_row, ignore_index=True)
+        #resp_row = self.run_support_vector_machine_eval(X_train, y_train, X_test, y_test,y_mapping)
+        #comparisson_df = comparisson_df.append(resp_row, ignore_index=True)
 
         # DECISSION TREE
         resp_row = self.run_decision_tree_eval(X_train, y_train, X_test, y_test,y_mapping)
@@ -436,8 +446,8 @@ class MLModelAnalyzer():
         predictions_dict["Logistic Regression"]=y_hat_lr_df
 
         # SUPPORT VECTOR MACHINE
-        y_hat_svm_df= self.run_predictions(X,"date",_SVM_MODEL_NAME  )
-        predictions_dict["Support Vector Machine"] = y_hat_svm_df
+        #y_hat_svm_df= self.run_predictions(X,"date",_SVM_MODEL_NAME  )
+        #predictions_dict["Support Vector Machine"] = y_hat_svm_df
 
         # DECISION TREE
         y_hat_dec_tree_df= self.run_predictions(X,"date",_DECISSION_TREE_MODEL_NAME  )
