@@ -1,12 +1,15 @@
 import traceback
 from datetime import timedelta
 
+from common.util.image_handler import ImageHandler
+from common.util.light_logger import LightLogger
 from data_access_layer.date_range_classification_manager import DateRangeClassificationManager
 from data_access_layer.economic_series_manager import EconomicSeriesManager
 
 from framework.common.logger.message_type import MessageType
 from logic_layer.ARIMA_models_analyzer import ARIMAModelsAnalyzer
 from logic_layer.data_set_builder import DataSetBuilder
+from logic_layer.deep_neural_network import DeepNeuralNetwork
 from logic_layer.indicator_based_trading_backtester import IndicatorBasedTradingBacktester
 from logic_layer.ml_models_analyzer import MLModelAnalyzer
 import pandas as pd
@@ -138,6 +141,37 @@ class DataManagement:
 
         except Exception as e:
             msg = "CRITICAL ERROR processing model @predict_ARIMA:{}".format(str(e))
+            self.logger.do_log(msg, MessageType.ERROR)
+            raise Exception(msg)
+
+    def train_deep_neural_network(self,true_path,false_path,true_label,learning_rate=0.0075,num_iterations=2500):
+
+
+        try:
+
+            LightLogger.do_log("Extracting images from true and false paths")
+
+            handler = ImageHandler()
+
+            train_x,train_y,image_idx=handler.create_sets(true_path,false_path,true_label,".jpg")
+
+            LightLogger.do_log("Extracted {} train examples".format(len(image_idx)))
+
+            layers_dims = [len(train_x), 20, 7, 5, 1] # len(train_x)--> ints in flattened vectors--> ex: 122880
+
+            neural_network=DeepNeuralNetwork()
+
+            LightLogger.do_log("Training Network with Learning Rate={} and num_iterations={}".format(learning_rate,num_iterations))
+            parameters, costs =neural_network.L_layer_model_train(train_x,train_y,layers_dims,learning_rate=learning_rate,num_iterations=num_iterations,print_cost=True)
+            #parameters es el modelo!
+            pass
+
+        except Exception as e:
+            # Obtiene la pila de llamadas
+            tb = traceback.extract_tb(e.__traceback__)
+            # Obtiene la última línea de la pila de llamadas
+            file_name, line_number, func_name, line_code = tb[-1]
+            msg = "CRITICAL ERROR @train_deep_neural_network:{}".format(str(e))
             self.logger.do_log(msg, MessageType.ERROR)
             raise Exception(msg)
 
