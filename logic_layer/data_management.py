@@ -144,7 +144,8 @@ class DataManagement:
             self.logger.do_log(msg, MessageType.ERROR)
             raise Exception(msg)
 
-    def train_deep_neural_network(self,true_path,false_path,true_label,learning_rate=0.0075,num_iterations=2500):
+    def train_deep_neural_network(self,true_path,false_path,true_label,learning_rate=0.0075,num_iterations=2500,
+                                  arch_file=None, activ_file=None):
 
 
         try:
@@ -157,12 +158,13 @@ class DataManagement:
 
             LightLogger.do_log("Extracted {} train examples".format(len(image_idx)))
 
-            layers_dims = [len(train_x), 20, 7, 5, 1] # len(train_x)--> ints in flattened vectors--> ex: 122880
-
             neural_network=DeepNeuralNetwork()
 
+            layers_dims=neural_network.build_layers_dims(len(train_x),arch_file) # len(train_x)--> ints in flattened vectors--> ex: 122880
+            activations=neural_network.build_activations(activ_file)
+
             LightLogger.do_log("Training Network with Learning Rate={} and num_iterations={}".format(learning_rate,num_iterations))
-            parameters, costs =neural_network.L_layer_model_train(train_x,train_y,layers_dims,learning_rate=learning_rate,num_iterations=num_iterations,print_cost=True)
+            parameters, costs =neural_network.L_layer_model_train(train_x,train_y,layers_dims,activations,learning_rate=learning_rate,num_iterations=num_iterations,print_cost=True)
             #parameters es el modelo!
             pass
 

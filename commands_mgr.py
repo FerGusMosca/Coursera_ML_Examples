@@ -19,7 +19,7 @@ def show_commands():
     print("#6-PredictARIMA [Symbol] [p] [d] [q] [from] [to] [Period] [Step]")
     print("#7-EvalSingleIndicatorAlgo [Symbol] [indicator] [from] [to] [inverted]")
     print("#8-EvalMLBiasedAlgo [Symbol] [indicator] [SeriesCSV] [from] [to] [inverted]")
-    print("#9-TrainDeepNeuralNetwork [true_path] [false_path] [true_lavel] [learning_rate] [iterations]")
+    print("#9-TrainDeepNeuralNetwork [true_path] [false_path] [true_lavel] [learning_rate] [iterations] [arch_file] [activ_file]")
 
     print("#n-Exit")
 
@@ -181,7 +181,7 @@ def process_eval_ml_biased_algo(symbol, indicator,seriesCSV,str_from,str_to,inve
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
 
 
-def process_train_deep_neural_network(true_path,false_path,true_label,learning_rate,iterations):
+def process_train_deep_neural_network(true_path,false_path,true_label,learning_rate,iterations,arch_file, activ_file):
     loader = MLSettingsLoader()
     logger = Logger()
     try:
@@ -191,7 +191,7 @@ def process_train_deep_neural_network(true_path,false_path,true_label,learning_r
 
         dataMgm = DataManagement(config_settings["hist_data_conn_str"], config_settings["ml_reports_conn_str"],
                                  config_settings["classification_map_key"], logger)
-        dataMgm.train_deep_neural_network(true_path, false_path, true_label,learning_rate,iterations)
+        dataMgm.train_deep_neural_network(true_path, false_path, true_label,learning_rate,iterations,arch_file, activ_file)
 
     except Exception as e:
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
@@ -255,9 +255,9 @@ def process_commands(cmd):
                                             cmd_param_list[5],cmd_param_list[6])
 
     elif cmd_param_list[0] == "TrainDeepNeuralNetwork":
-        params_validation("TrainDeepNeuralNetwork", cmd_param_list, 6)
+        params_validation("TrainDeepNeuralNetwork", cmd_param_list, 8)
         process_train_deep_neural_network(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3],float( cmd_param_list[4]),
-                                          int( cmd_param_list[5]))
+                                          int( cmd_param_list[5]),cmd_param_list[6],cmd_param_list[7])
 
 
     else:

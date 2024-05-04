@@ -1,4 +1,5 @@
 import copy
+import csv
 
 import numpy as np
 
@@ -123,7 +124,7 @@ class DeepNeuralNetwork():
 
         return A, cache
 
-    def L_model_forward(self,X, parameters):
+    def L_model_forward(self,X, parameters,activations):
         """
         Implement forward propagation for the [LINEAR->RELU]*(L-1)->LINEAR->SIGMOID computation
 
@@ -150,7 +151,7 @@ class DeepNeuralNetwork():
             # A, cache = ...
             # caches ...
             # (A_prev, W, b, activation)
-            A, cache = self.linear_activation_forward(A_prev, parameters["W" + str(l)], parameters["b" + str(l)], "relu")
+            A, cache = self.linear_activation_forward(A_prev, parameters["W" + str(l)], parameters["b" + str(l)], activations[l-1])
             caches.append(cache)
             A_prev = A
 
@@ -158,7 +159,7 @@ class DeepNeuralNetwork():
         # (≈ 2 lines of code)
         # AL, cache = ...
         # caches ...
-        AL, cache = self.linear_activation_forward(A_prev, parameters["W" + str(L)], parameters["b" + str(L)], "sigmoid")
+        AL, cache = self.linear_activation_forward(A_prev, parameters["W" + str(L)], parameters["b" + str(L)],  activations[L-1])
 
         caches.append(cache)
 
@@ -247,7 +248,7 @@ class DeepNeuralNetwork():
 
         return dA_prev, dW, db
 
-    def L_model_backward(self,AL, Y, caches):
+    def L_model_backward(self,AL, Y,activations, caches):
         """
         Implement the backward propagation for the [LINEAR->RELU] * (L-1) -> LINEAR -> SIGMOID group
 
@@ -283,7 +284,7 @@ class DeepNeuralNetwork():
         # grads["dW" + str(L)] = ...
         # grads["db" + str(L)] = ...
         current_cache = caches[L - 1]
-        dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(dAL, current_cache, "sigmoid")
+        dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(dAL, current_cache,activations[L-1])
         grads["dA" + str(L - 1)] = dA_prev_temp
         grads["dW" + str(L)] = dW_temp
         grads["db" + str(L)] = db_temp
@@ -299,7 +300,7 @@ class DeepNeuralNetwork():
             # grads["dW" + str(l + 1)] = ...
             # grads["db" + str(l + 1)] = ...
             current_cache = caches[l]
-            dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(grads["dA" + str(l + 1)], current_cache, "relu")
+            dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(grads["dA" + str(l + 1)], current_cache, activations[l])
             grads["dA" + str(l)] = dA_prev_temp
             grads["dW" + str(l + 1)] = dW_temp
             grads["db" + str(l + 1)] = db_temp
@@ -338,7 +339,7 @@ class DeepNeuralNetwork():
 
     #region Public Methods
 
-    def L_layer_model_train(self,X, Y, layers_dims, learning_rate=0.0075, num_iterations=3000, print_cost=False):
+    def L_layer_model_train(self,X, Y, layers_dims,activations, learning_rate=0.0075, num_iterations=3000, print_cost=False):
         """
             Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SIGMOID.
 
@@ -370,7 +371,7 @@ class DeepNeuralNetwork():
             # AL, caches = ...
             # YOUR CODE STARTS HERE
 
-            AL, caches = self.L_model_forward(X, parameters)
+            AL, caches = self.L_model_forward(X, parameters,activations)
 
             # YOUR CODE ENDS HERE
 
@@ -379,7 +380,7 @@ class DeepNeuralNetwork():
 
 
             # Backward propagation.
-            grads = self.L_model_backward(AL, Y, caches)
+            grads = self.L_model_backward(AL, Y,activations, caches)
 
             # YOUR CODE ENDS HERE
             parameters = self.update_parameters(parameters, grads, learning_rate)
@@ -394,5 +395,39 @@ class DeepNeuralNetwork():
 
         return parameters, costs
 
+
+    def build_layers_dims(self,num_features,arch_file):
+
+        if arch_file is not None:
+            output_arr=[num_features]
+
+            with open(arch_file.replace('"',""), newline='') as file:
+                csv_reader = csv.reader(file, delimiter=',')
+
+                for row in csv_reader:
+                    # Convert the values in the row to integers and append them to the list
+                    output_arr.extend([int(value) for value in row])
+
+
+            return  output_arr
+        else:
+            return [num_features, 20, 7, 5, 1]#just the default network
+
+    def build_activations(self,activations_file):
+
+        if activations_file is not None:
+            output_arr=[]
+
+            with open(activations_file.replace('"',""), newline='') as file:
+                csv_reader = csv.reader(file, delimiter=',')
+
+                for row in csv_reader:
+                    # Convert the values in the row to integers and append them to the list
+                    output_arr.extend([str(value) for value in row])
+
+
+            return  output_arr
+        else:
+            return ["relu","relu","relu","sigmoid"]#just the default network
 
     #endregion

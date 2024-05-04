@@ -61,7 +61,7 @@ class ImageHandler():
 
     def __find_inner_files__(self,path,image_type):
         type_files = []
-        for root_dir, dirs, files in os.walk(path):
+        for root_dir, dirs, files in os.walk(path.replace('"','')):
             for file in files:
                 if file.endswith(image_type):
                     type_files.append(os.path.join(root_dir, file))
