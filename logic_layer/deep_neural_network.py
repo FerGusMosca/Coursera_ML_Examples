@@ -62,7 +62,6 @@ class DeepNeuralNetwork():
         dZ = dA * sig * (1 - sig)
         return dZ
 
-
     def linear_forward(self,A, W, b):
         """
         Implement the linear part of a layer's forward propagation.
@@ -108,7 +107,6 @@ class DeepNeuralNetwork():
             # YOUR CODE STARTS HERE
             Z, linear_cache = self.linear_forward(A_prev, W, b)
             A, activation_cache = self.sigmoid(Z)
-
             # YOUR CODE ENDS HERE
 
         elif activation == "relu":
@@ -118,7 +116,6 @@ class DeepNeuralNetwork():
             # YOUR CODE STARTS HERE
             Z, linear_cache = self.linear_forward(A_prev, W, b)
             A, activation_cache = self.relu(Z)
-
             # YOUR CODE ENDS HERE
         cache = (linear_cache, activation_cache)
 
@@ -246,6 +243,7 @@ class DeepNeuralNetwork():
             dZ = self.sigmoid_backward(dA, activation_cache)
             dA_prev, dW, db = self.linear_backward(dZ, linear_cache)
 
+
         return dA_prev, dW, db
 
     def L_model_backward(self,AL, Y,activations, caches):
@@ -301,6 +299,7 @@ class DeepNeuralNetwork():
             # grads["db" + str(l + 1)] = ...
             current_cache = caches[l]
             dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(grads["dA" + str(l + 1)], current_cache, activations[l])
+            #print("dA:{}".format(dA_prev_temp))
             grads["dA" + str(l)] = dA_prev_temp
             grads["dW" + str(l + 1)] = dW_temp
             grads["db" + str(l + 1)] = db_temp
@@ -378,7 +377,6 @@ class DeepNeuralNetwork():
             # Compute cost.
             cost = self.compute_cost(AL, Y)
 
-
             # Backward propagation.
             grads = self.L_model_backward(AL, Y,activations, caches)
 
@@ -386,7 +384,7 @@ class DeepNeuralNetwork():
             parameters = self.update_parameters(parameters, grads, learning_rate)
 
             # YOUR CODE ENDS HERE
-
+            LightLogger.do_log("Cost after iteration {}: {}".format(i, np.squeeze(cost)))
             # Print the cost every 100 iterations
             if print_cost and i % 100 == 0 or i == num_iterations - 1:
                 LightLogger.do_log("Cost after iteration {}: {}".format(i, np.squeeze(cost)))
@@ -429,5 +427,25 @@ class DeepNeuralNetwork():
             return  output_arr
         else:
             return ["relu","relu","relu","sigmoid"]#just the default network
+
+    def persist_parameters(self,parameters,output_file):
+        clean_output_file=output_file.replace('"','').replace('.npz','')
+        np.savez(clean_output_file, **parameters)
+
+
+    def retrieve_parameters(self,output_file):
+        clean_output_file = output_file.replace('"', '')
+        file_paramters = np.load(clean_output_file)
+
+        model_params={}
+        for key in file_paramters.keys():
+            model_params[key]=file_paramters[key]
+
+
+        return  model_params
+
+
+
+
 
     #endregion

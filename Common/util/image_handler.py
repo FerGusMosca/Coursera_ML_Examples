@@ -42,10 +42,11 @@ class ImageHandler():
 
         return images
 
-    def __load_image_rows(self,images,def_width=500,def_height=375):
+    def __load_image_rows__(self,images,def_width=500,def_height=375):
         image_rows = []
 
         for image in images:
+
             LightLogger.do_log("Processing img {}: Extracting pixels".format(image[0]))
             image_arr = cv2.imread(image[0])  # 0 containes the path
             image_arr = cv2.resize(image_arr, (def_width, def_height))
@@ -74,7 +75,7 @@ class ImageHandler():
 
         images=self.__load_images__(true_images,false_images,true_label)
 
-        image_rows = self.__load_image_rows(images)
+        image_rows = self.__load_image_rows__(images)
 
         LightLogger.do_log("Reshuffling {} instances".format(len(image_rows)))
         random.shuffle(image_rows)
