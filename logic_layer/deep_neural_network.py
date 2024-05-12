@@ -394,6 +394,17 @@ class DeepNeuralNetwork():
         return parameters, costs
 
 
+    def L_layer_model_test(self,X,Y,parameters,activations):
+        AL, caches = self.L_model_forward(X, parameters,activations)
+
+        Yhat=(AL >= 0.5).astype(int)
+
+        matches = np.sum(Y == Yhat)
+
+        # Calcular la proporción de accuracy
+        accuracy = matches / len(Y[0])
+        return accuracy
+
     def build_layers_dims(self,num_features,arch_file):
 
         if arch_file is not None:
@@ -428,10 +439,11 @@ class DeepNeuralNetwork():
         else:
             return ["relu","relu","relu","sigmoid"]#just the default network
 
-    def persist_parameters(self,parameters,output_file):
+    def persist_parameters(self,parameters, activations,output_file):
         clean_output_file=output_file.replace('"','').replace('.npz','')
-        np.savez(clean_output_file, **parameters)
+        parameters["activations"]=activations
 
+        np.savez(clean_output_file, **parameters)
 
     def retrieve_parameters(self,output_file):
         clean_output_file = output_file.replace('"', '')

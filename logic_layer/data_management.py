@@ -169,7 +169,7 @@ class DataManagement:
             #We persist everything
 
             if output_file is not None:
-                neural_network.persist_parameters(parameters,output_file)#parameters es el modelo!
+                neural_network.persist_parameters(parameters,activations,output_file)#parameters es el modelo!
                 LightLogger.do_log("Model successfully persisted at {}".format(output_file))
 
                 #test retreive parameters
@@ -184,6 +184,36 @@ class DataManagement:
             # Obtiene la última línea de la pila de llamadas
             file_name, line_number, func_name, line_code = tb[-1]
             msg = "CRITICAL ERROR @train_deep_neural_network:{}".format(str(e))
+            self.logger.do_log(msg, MessageType.ERROR)
+            raise Exception(msg)
+
+
+    def test_deep_neural_network_model(self,true_path,false_path,true_label,output_file):
+        try:
+            LightLogger.do_log("Extracting model from file {}".format(output_file))
+
+            neural_network = DeepNeuralNetwork()
+
+            parameters = neural_network.retrieve_parameters(output_file)
+            LightLogger.do_log("Successfully retrieved {} for testing".format(output_file))
+
+            LightLogger.do_log("Extracting tests sets from true path={} and false paths={}".format(true_path,false_path))
+            handler = ImageHandler()
+            test_x, test_y, image_idx = handler.create_sets(true_path, false_path, true_label, ".jpg")
+
+            accuracy=neural_network.L_layer_model_test(test_x,test_y,parameters,parameters["activations"])
+
+            LightLogger.do_log("Found an accuracy of {} for {} test instances".format(accuracy,test_x.shape[1]))
+
+            return  accuracy
+
+
+        except Exception as e:
+            # Obtiene la pila de llamadas
+            tb = traceback.extract_tb(e.__traceback__)
+            # Obtiene la última línea de la pila de llamadas
+            file_name, line_number, func_name, line_code = tb[-1]
+            msg = "CRITICAL ERROR @test_deep_neural_network_model:{}".format(str(e))
             self.logger.do_log(msg, MessageType.ERROR)
             raise Exception(msg)
 
