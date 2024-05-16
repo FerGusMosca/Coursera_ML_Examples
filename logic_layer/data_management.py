@@ -145,7 +145,7 @@ class DataManagement:
             raise Exception(msg)
 
     def train_deep_neural_network(self,true_path,false_path,true_label,learning_rate=0.075,num_iterations=2500,
-                                  arch_file=None, activ_file=None,output_file=None):
+                                  arch_file=None, activ_file=None,output_file=None,step_size=200):
 
 
         try:
@@ -154,17 +154,37 @@ class DataManagement:
 
             handler = ImageHandler()
 
-            train_x,train_y,image_idx=handler.create_sets(true_path,false_path,true_label,".jpg")
+            offset=0
+            end=False
 
-            LightLogger.do_log("Extracted {} train examples".format(len(image_idx)))
+            neural_network = DeepNeuralNetwork()
 
-            neural_network=DeepNeuralNetwork()
+            parameters=None
+            activations = neural_network.build_activations(activ_file)
+            index=0
 
-            layers_dims=neural_network.build_layers_dims(len(train_x),arch_file) # len(train_x)--> ints in flattened vectors--> ex: 122880
-            activations=neural_network.build_activations(activ_file)
+            while not end  : #we prepare the batches
 
-            LightLogger.do_log("Training Network with Learning Rate={} and num_iterations={}".format(learning_rate,num_iterations))
-            parameters, costs =neural_network.L_layer_model_train(train_x,train_y,layers_dims,activations,learning_rate=learning_rate,num_iterations=num_iterations,print_cost=True)
+                LightLogger.do_log("Fetching images for step {}".format(index))
+
+                train_x,train_y,image_idx=handler.create_sets(true_path,false_path,true_label,".jpg",offset,step_size)
+
+                if(len(train_x)< (step_size*2) ): #we have less than en enough rows for the available step --> we got to the end
+                    end=True #this is the last run
+
+                if len(train_x)>0:
+
+                    LightLogger.do_log("Extracted {} train examples".format(len(image_idx)))
+
+                    layers_dims=neural_network.build_layers_dims(len(train_x),arch_file) # len(train_x)--> ints in flattened vectors--> ex: 122880
+
+                    LightLogger.do_log("Training Network with Learning Rate={} and num_iterations={}".format(learning_rate,num_iterations))
+                    parameters, costs =neural_network.L_layer_model_train(train_x,train_y,layers_dims,activations,learning_rate=learning_rate,
+                                                                          num_iterations=num_iterations,print_cost=True,parameters=parameters)
+
+                offset+=1
+                index+=1
+
 
             #We persist everything
 

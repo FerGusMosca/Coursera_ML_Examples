@@ -338,7 +338,8 @@ class DeepNeuralNetwork():
 
     #region Public Methods
 
-    def L_layer_model_train(self,X, Y, layers_dims,activations, learning_rate=0.0075, num_iterations=3000, print_cost=False):
+    def L_layer_model_train(self,X, Y, layers_dims,activations, learning_rate=0.0075, num_iterations=3000, print_cost=False,
+                            parameters=None):
         """
             Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SIGMOID.
 
@@ -357,8 +358,9 @@ class DeepNeuralNetwork():
         np.random.seed(1)
         costs = []  # keep track of cost
 
-        # Parameters initialization.
-        parameters = self.initialize_parameters_deep(layers_dims)
+        if parameters is None:
+            # Parameters initialization.
+            parameters = self.initialize_parameters_deep(layers_dims)
 
         # YOUR CODE ENDS HERE
 

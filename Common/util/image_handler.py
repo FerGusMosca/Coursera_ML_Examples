@@ -30,15 +30,29 @@ class ImageHandler():
 
         return  train_x,train_y,image_idx
 
-    def __load_images__(self,true_images,false_images,true_label):
+    def __load_images__(self,true_images,false_images,true_label,offset,step_size):
         images = []
+        i=0
+        start = offset*step_size
         for true_img in true_images:
-            LightLogger.do_log("Adding TRUE img {} to the list which is a {}".format(true_img, true_label))
-            images.append([true_img, true_label, 1])
+            if i>=start and i< (start+step_size):
+                LightLogger.do_log("Adding TRUE img {} to the list which is a {}".format(true_img, true_label))
+                images.append([true_img, true_label, 1])
 
+            elif i>=(start+step_size):
+                break
+
+            i += 1
+
+        i=0
         for false_img in false_images:
-            LightLogger.do_log("Adding FALSE img {} to the list which is a {}".format(false_img, "not" + true_label))
-            images.append([false_img, "not " + true_label, 0])
+            if i >= start and i < (start + step_size):
+                LightLogger.do_log("Adding FALSE img {} to the list which is a {}".format(false_img, "not" + true_label))
+                images.append([false_img, "not " + true_label, 0])
+            elif i >= (start + step_size):
+                break
+
+            i += 1
 
         return images
 
@@ -68,12 +82,12 @@ class ImageHandler():
                     type_files.append(os.path.join(root_dir, file))
         return type_files
 
-    def create_sets(self,true_path,false_path,true_label,image_type=".jpg"):
+    def create_sets(self,true_path,false_path,true_label,image_type=".jpg",offset=0,step_size=2000):
 
         true_images= self.__find_inner_files__(true_path,image_type)
         false_images= self.__find_inner_files__(false_path,image_type)
 
-        images=self.__load_images__(true_images,false_images,true_label)
+        images=self.__load_images__(true_images,false_images,true_label,offset,step_size)
 
         image_rows = self.__load_image_rows__(images)
 
