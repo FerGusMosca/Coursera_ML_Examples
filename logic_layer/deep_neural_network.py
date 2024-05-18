@@ -339,7 +339,7 @@ class DeepNeuralNetwork():
     #region Public Methods
 
     def L_layer_model_train(self,X, Y, layers_dims,activations, learning_rate=0.0075, num_iterations=3000, print_cost=False,
-                            parameters=None):
+                            parameters=None,loop=0):
         """
             Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SIGMOID.
 
@@ -386,10 +386,10 @@ class DeepNeuralNetwork():
             parameters = self.update_parameters(parameters, grads, learning_rate)
 
             # YOUR CODE ENDS HERE
-            LightLogger.do_log("Cost after iteration {}: {}".format(i, np.squeeze(cost)))
+            LightLogger.do_log("Cost after iteration {} (loop {}): {}".format(i, np.squeeze(cost),loop))
             # Print the cost every 100 iterations
             if print_cost and i % 100 == 0 or i == num_iterations - 1:
-                LightLogger.do_log("Cost after iteration {}: {}".format(i, np.squeeze(cost)))
+                LightLogger.do_log("Cost after iteration {}(loop {}): {}".format(i, np.squeeze(cost),loop))
             if i % 100 == 0 or i == num_iterations:
                 costs.append(cost)
 

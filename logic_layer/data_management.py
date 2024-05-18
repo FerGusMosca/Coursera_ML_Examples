@@ -180,7 +180,7 @@ class DataManagement:
 
                     LightLogger.do_log("Training Network with Learning Rate={} and num_iterations={}".format(learning_rate,num_iterations))
                     parameters, costs =neural_network.L_layer_model_train(train_x,train_y,layers_dims,activations,learning_rate=learning_rate,
-                                                                          num_iterations=num_iterations,print_cost=True,parameters=parameters)
+                                                                          num_iterations=num_iterations,print_cost=True,parameters=parameters,loop=index)
 
                 offset+=1
                 index+=1
