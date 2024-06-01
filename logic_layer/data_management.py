@@ -221,7 +221,7 @@ class DataManagement:
             handler = ImageHandler()
             test_x, test_y, image_idx = handler.create_sets(true_path, false_path, true_label, ".jpg")
 
-            accuracy=neural_network.L_layer_model_test(test_x,test_y,parameters,parameters["activations"])
+            accuracy=neural_network.L_layer_model_test(test_x,test_y,image_idx,parameters,parameters["activations"])
 
             LightLogger.do_log("Found an accuracy of {} for {} test instances".format(accuracy,test_x.shape[1]))
 

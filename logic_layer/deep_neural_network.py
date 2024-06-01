@@ -386,17 +386,17 @@ class DeepNeuralNetwork():
             parameters = self.update_parameters(parameters, grads, learning_rate)
 
             # YOUR CODE ENDS HERE
-            LightLogger.do_log("Cost after iteration {} (loop {}): {}".format(i, np.squeeze(cost),loop))
+            LightLogger.do_log("Cost after iteration {} (loop {}): {}".format(i,loop, np.squeeze(cost)))
             # Print the cost every 100 iterations
             if print_cost and i % 100 == 0 or i == num_iterations - 1:
-                LightLogger.do_log("Cost after iteration {}(loop {}): {}".format(i, np.squeeze(cost),loop))
+                LightLogger.do_log("Cost after iteration {}(loop {}): {}".format(i,loop, np.squeeze(cost)))
             if i % 100 == 0 or i == num_iterations:
                 costs.append(cost)
 
         return parameters, costs
 
 
-    def L_layer_model_test(self,X,Y,parameters,activations):
+    def L_layer_model_test(self,X,Y,image_idx,parameters,activations):
         AL, caches = self.L_model_forward(X, parameters,activations)
 
         Yhat=(AL >= 0.5).astype(int)
