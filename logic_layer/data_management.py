@@ -145,7 +145,7 @@ class DataManagement:
             raise Exception(msg)
 
     def train_deep_neural_network(self,true_path,false_path,true_label,learning_rate=0.075,num_iterations=2500,
-                                  arch_file=None, activ_file=None,output_file=None,step_size=200):
+                                  arch_file=None, activ_file=None,output_file=None,step_size=200,lambd=0):
 
 
         try:
@@ -180,7 +180,8 @@ class DataManagement:
 
                     LightLogger.do_log("Training Network with Learning Rate={} and num_iterations={}".format(learning_rate,num_iterations))
                     parameters, costs =neural_network.L_layer_model_train(train_x,train_y,layers_dims,activations,learning_rate=learning_rate,
-                                                                          num_iterations=num_iterations,print_cost=True,parameters=parameters,loop=index)
+                                                                          num_iterations=num_iterations,print_cost=True,parameters=parameters,loop=index,
+                                                                          lambd=lambd)
 
                 offset+=1
                 index+=1

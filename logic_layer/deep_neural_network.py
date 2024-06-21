@@ -31,7 +31,7 @@ class DeepNeuralNetwork():
         dZ[Z <= 0] = 0
         return  dZ
 
-    def linear_backward(self,dZ, linear_cache):
+    def linear_backward(self,dZ, linear_cache,lambd=0):#lambd=regularization param
         """
             Implement the linear portion of backward propagation for a single layer (layer l)
 
@@ -51,7 +51,10 @@ class DeepNeuralNetwork():
         # dW = ...
         # db = ... sum by the rows of dZ with keepdims=True
         # dA_prev = ...
-        dW = np.dot(dZ, A_prev.T) / m
+
+        reg_lamd= (lambd/m)*W #regularization parameter
+
+        dW = (np.dot(dZ, A_prev.T) / m) + (reg_lamd)
         db = np.sum(dZ, axis=1, keepdims=True) / m
         dA_prev = np.dot(W.T, dZ)
         return dA_prev, dW, db
@@ -213,7 +216,7 @@ class DeepNeuralNetwork():
 
         return cost
 
-    def linear_activation_backward(self,dA, cache, activation):
+    def linear_activation_backward(self,dA, cache, activation,lambd=0):
         """
         Implement the backward propagation for the LINEAR->ACTIVATION layer.
 
@@ -234,19 +237,19 @@ class DeepNeuralNetwork():
             # dZ =  ...
             # dA_prev, dW, db =  ...
             dZ = self.relu_backward(dA, activation_cache)
-            dA_prev, dW, db = self.linear_backward(dZ, linear_cache)
+            dA_prev, dW, db = self.linear_backward(dZ, linear_cache,lambd=lambd)
 
         elif activation == "sigmoid":
             # (≈ 2 lines of code)
             # dZ =  ...
             # dA_prev, dW, db =  ...
             dZ = self.sigmoid_backward(dA, activation_cache)
-            dA_prev, dW, db = self.linear_backward(dZ, linear_cache)
+            dA_prev, dW, db = self.linear_backward(dZ, linear_cache,lambd=lambd)
 
 
         return dA_prev, dW, db
 
-    def L_model_backward(self,AL, Y,activations, caches):
+    def L_model_backward(self,AL, Y,activations, caches,lambd=0):
         """
         Implement the backward propagation for the [LINEAR->RELU] * (L-1) -> LINEAR -> SIGMOID group
 
@@ -270,7 +273,7 @@ class DeepNeuralNetwork():
 
         # Initializing the backpropagation
         # (1 line of code)
-        dAL = -(np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
+        dAL = -(np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))#also known as dZ
 
         # YOUR CODE ENDS HERE
 
@@ -282,7 +285,7 @@ class DeepNeuralNetwork():
         # grads["dW" + str(L)] = ...
         # grads["db" + str(L)] = ...
         current_cache = caches[L - 1]
-        dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(dAL, current_cache,activations[L-1])
+        dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(dAL, current_cache,activations[L-1],lambd)
         grads["dA" + str(L - 1)] = dA_prev_temp
         grads["dW" + str(L)] = dW_temp
         grads["db" + str(L)] = db_temp
@@ -298,7 +301,7 @@ class DeepNeuralNetwork():
             # grads["dW" + str(l + 1)] = ...
             # grads["db" + str(l + 1)] = ...
             current_cache = caches[l]
-            dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(grads["dA" + str(l + 1)], current_cache, activations[l])
+            dA_prev_temp, dW_temp, db_temp = self.linear_activation_backward(grads["dA" + str(l + 1)], current_cache, activations[l],lambd)
             #print("dA:{}".format(dA_prev_temp))
             grads["dA" + str(l)] = dA_prev_temp
             grads["dW" + str(l + 1)] = dW_temp
@@ -339,7 +342,7 @@ class DeepNeuralNetwork():
     #region Public Methods
 
     def L_layer_model_train(self,X, Y, layers_dims,activations, learning_rate=0.0075, num_iterations=3000, print_cost=False,
-                            parameters=None,loop=0):
+                            parameters=None,loop=0,lambd=0):
         """
             Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SIGMOID.
 
@@ -349,6 +352,7 @@ class DeepNeuralNetwork():
             layers_dims -- list containing the input size and each layer size, of length (number of layers + 1).
             learning_rate -- learning rate of the gradient descent update rule
             num_iterations -- number of iterations of the optimization loop
+            lambd--> Regularization parameter
             print_cost -- if True, it prints the cost every 100 steps
 
             Returns:
@@ -380,7 +384,7 @@ class DeepNeuralNetwork():
             cost = self.compute_cost(AL, Y)
 
             # Backward propagation.
-            grads = self.L_model_backward(AL, Y,activations, caches)
+            grads = self.L_model_backward(AL, Y,activations, caches,lambd=lambd)
 
             # YOUR CODE ENDS HERE
             parameters = self.update_parameters(parameters, grads, learning_rate)

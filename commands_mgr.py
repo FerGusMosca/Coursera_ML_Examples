@@ -183,7 +183,7 @@ def process_eval_ml_biased_algo(symbol, indicator,seriesCSV,str_from,str_to,inve
 
 
 def process_train_deep_neural_network(true_path,false_path,true_label,learning_rate,iterations,arch_file, activ_file,output_file,
-                                      step_size):
+                                      step_size,lambd=0.0):
     loader = MLSettingsLoader()
     logger = Logger()
     try:
@@ -194,7 +194,7 @@ def process_train_deep_neural_network(true_path,false_path,true_label,learning_r
         dataMgm = DataManagement(config_settings["hist_data_conn_str"], config_settings["ml_reports_conn_str"],
                                  config_settings["classification_map_key"], logger)
         dataMgm.train_deep_neural_network(true_path, false_path, true_label,learning_rate,iterations,arch_file, activ_file,
-                                        output_file,step_size)
+                                        output_file,step_size,lambd=lambd)
 
     except Exception as e:
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
@@ -277,6 +277,14 @@ def process_commands(cmd):
         process_train_deep_neural_network(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3],float( cmd_param_list[4]),
                                           int( cmd_param_list[5]),cmd_param_list[6],cmd_param_list[7],cmd_param_list[8],
                                           int(cmd_param_list[9]))
+    elif cmd_param_list[0] == "TrainDeepNeuralNetworkReg":
+        params_validation("TrainDeepNeuralNetworkReg", cmd_param_list, 11)
+        process_train_deep_neural_network(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3],
+                                          float(cmd_param_list[4]),
+                                          int(cmd_param_list[5]), cmd_param_list[6], cmd_param_list[7],
+                                          cmd_param_list[8],
+                                          int(cmd_param_list[9]),
+                                          lambd=float(cmd_param_list[10]))
     elif cmd_param_list[0] == "TestDeepNeuralNetworkModel":
         params_validation("TestDeepNeuralNetworkModel", cmd_param_list, 5)
         test_deep_neural_network_model(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3],cmd_param_list[4])
