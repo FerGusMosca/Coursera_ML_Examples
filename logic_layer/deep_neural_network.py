@@ -165,7 +165,7 @@ class DeepNeuralNetwork():
 
         return AL, caches
 
-    def initialize_parameters_deep(self,layer_dims):
+    def initialize_parameters_deep(self,layer_dims,use_He_init=False):
         """
         Arguments:
         layer_dims -- python array (list) containing the dimensions of each layer in our network
@@ -184,7 +184,13 @@ class DeepNeuralNetwork():
             # (≈ 2 lines of code)
             # parameters['W' + str(l)] = ...
             # parameters['b' + str(l)] = ...
-            parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l - 1]) * 0.01
+
+            if use_He_init:
+                parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l - 1]) * np.sqrt(2./layer_dims[l-1])
+            else:#Standaard Low numbers weights init
+                parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l - 1]) * 0.01
+
+
             parameters['b' + str(l)] = np.zeros((layer_dims[l], 1))
 
             assert (parameters['W' + str(l)].shape == (layer_dims[l], layer_dims[l - 1]))
@@ -342,7 +348,7 @@ class DeepNeuralNetwork():
     #region Public Methods
 
     def L_layer_model_train(self,X, Y, layers_dims,activations, learning_rate=0.0075, num_iterations=3000, print_cost=False,
-                            parameters=None,loop=0,lambd=0):
+                            parameters=None,loop=0,lambd=0,use_He_init=False):
         """
             Implements a L-layer neural network: [LINEAR->RELU]*(L-1)->LINEAR->SIGMOID.
 
@@ -364,7 +370,7 @@ class DeepNeuralNetwork():
 
         if parameters is None:
             # Parameters initialization.
-            parameters = self.initialize_parameters_deep(layers_dims)
+            parameters = self.initialize_parameters_deep(layers_dims,use_He_init=use_He_init)
 
         # YOUR CODE ENDS HERE
 
