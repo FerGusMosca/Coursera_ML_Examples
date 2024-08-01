@@ -1,3 +1,4 @@
+import sys
 import traceback
 from datetime import timedelta
 
@@ -8,6 +9,7 @@ from data_access_layer.economic_series_manager import EconomicSeriesManager
 
 from framework.common.logger.message_type import MessageType
 from logic_layer.ARIMA_models_analyzer import ARIMAModelsAnalyzer
+from logic_layer.convolutional_neural_netowrk import ConvolutionalNeuralNetwork
 from logic_layer.data_set_builder import DataSetBuilder
 from logic_layer.deep_neural_network import DeepNeuralNetwork
 from logic_layer.indicator_based_trading_backtester import IndicatorBasedTradingBacktester
@@ -143,6 +145,37 @@ class DataManagement:
             msg = "CRITICAL ERROR processing model @predict_ARIMA:{}".format(str(e))
             self.logger.do_log(msg, MessageType.ERROR)
             raise Exception(msg)
+
+
+    def train_convolutional_neural_network(self,train_true_path,train_false_path,test_true_path,test_false_path,true_label,arch_file,padding,stride,iterations):
+        try:
+            LightLogger.do_log("Extracting images from true and false paths")
+
+            handler = ImageHandler()
+
+            LightLogger.do_log("Fetching images from true path {} and false path {} ".format(train_true_path, train_false_path))
+
+            train_x, train_y, image_idx_train = handler.create_non_vect_sets(train_true_path, train_false_path, true_label, ".jpg")
+
+            test_x, test_y, image_idx_test = handler.create_non_vect_sets(test_true_path, test_false_path, true_label, ".jpg")
+
+            cnn= ConvolutionalNeuralNetwork()
+
+            cnn.train_model(train_x, train_y,test_x, test_y,arch_file,padding,stride,iterations)
+
+
+            #TODO finish everything
+            #raise ("NOT FINISHED")
+
+        except Exception as e:
+            # Obtiene la pila de llamadas
+            tb = traceback.extract_tb(e.__traceback__)
+            # Obtiene la última línea de la pila de llamadas
+            file_name, line_number, func_name, line_code = tb[-1]
+            msg = "CRITICAL ERROR @train_convolutional_neural_network:{}".format(str(e))
+            self.logger.do_log(msg, MessageType.ERROR)
+            raise Exception(msg)
+
 
     def train_deep_neural_network(self,true_path,false_path,true_label,learning_rate=0.075,num_iterations=2500,
                                   arch_file=None, activ_file=None,output_file=None,step_size=200,lambd=0,use_He_init=False):

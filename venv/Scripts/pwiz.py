@@ -1,4 +1,4 @@
-#!C:\Users\zimzum\Desktop\Projects\Seeking Bias\courses_and_training\Coursera\ML\venv\Scripts\python.exe
+#!C:\Projects\Bias\machine_learning_tests\Coursera_ML_Examples\venv\Scripts\python.exe
 
 import datetime
 import os

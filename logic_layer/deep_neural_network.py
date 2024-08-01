@@ -344,7 +344,6 @@ class DeepNeuralNetwork():
     #endregion
 
 
-
     #region Public Methods
 
     def L_layer_model_train(self,X, Y, layers_dims,activations, learning_rate=0.0075, num_iterations=3000, print_cost=False,

@@ -22,6 +22,7 @@ def show_commands():
     print("#9-TrainDeepNeuralNetwork [true_path] [false_path] [true_lavel] [learning_rate] [iterations] [arch_file] [activ_file] [output file] [step size]")
     print("#10-TrainDeepNeuralNetworkReg [true_path] [false_path] [true_lavel] [learning_rate] [iterations] [arch_file] [activ_file] [output file] [step size] [lambd] [useHeInit]")
     print("#11-TestDeepNeuralNetworkModel [true_path] [false_path] [true_lavel] [output file]")
+    print("#12-TrainConvolutionalNeuralNetwork [train_true_path] [train_false_path] [test_true_path] [test_false_path] [true_lavel] [arch_file] [padding] [stride] [iterations]")
 
     print("#n-Exit")
 
@@ -200,6 +201,24 @@ def process_train_deep_neural_network(true_path,false_path,true_label,learning_r
     except Exception as e:
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
 
+
+def process_train_convolutional_neural_network(train_true_path,train_false_path,test_true_path, test_false_path,true_label,arch_file,padding,stride,iterations):
+    loader = MLSettingsLoader()
+    logger = Logger()
+    try:
+        logger.print("Train Convolutional Neural Netwokrk", MessageType.INFO)
+
+        config_settings = loader.load_settings("./configs/commands_mgr.ini")
+
+        dataMgm = DataManagement(config_settings["hist_data_conn_str"], config_settings["ml_reports_conn_str"],
+                                 config_settings["classification_map_key"], logger)
+        dataMgm.train_convolutional_neural_network(train_true_path, train_false_path,test_true_path, test_false_path, true_label, arch_file, padding, stride,
+                                                   iterations)
+
+    except Exception as e:
+        logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
+
+
 def test_deep_neural_network_model(true_path,false_path,true_label,output_file):
     loader = MLSettingsLoader()
     logger = Logger()
@@ -214,6 +233,8 @@ def test_deep_neural_network_model(true_path,false_path,true_label,output_file):
 
     except Exception as e:
         logger.print("CRITICAL ERROR bootstrapping the system:{}".format(str(e)), MessageType.ERROR)
+
+
 
 
 def process_predict_ARIMA(symbol, p,d,q, str_from,str_to,period,step):
@@ -290,6 +311,14 @@ def process_commands(cmd):
     elif cmd_param_list[0] == "TestDeepNeuralNetworkModel":
         params_validation("TestDeepNeuralNetworkModel", cmd_param_list, 5)
         test_deep_neural_network_model(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3],cmd_param_list[4])
+
+    elif cmd_param_list[0] == "TrainConvolutionalNeuralNetwork":
+        params_validation("TrainConvolutionalNeuralNetwork", cmd_param_list, 10)
+        process_train_convolutional_neural_network(cmd_param_list[1], cmd_param_list[2], cmd_param_list[3],
+                                                   cmd_param_list[4], cmd_param_list[5], cmd_param_list[6],
+                                                   cmd_param_list[7],int(cmd_param_list[8]),int(cmd_param_list[9]))
+
+    #
 
 
     else:

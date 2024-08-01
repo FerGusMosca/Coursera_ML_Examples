@@ -1,5 +1,7 @@
 import os
 import random
+import sys
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -56,7 +58,7 @@ class ImageHandler():
 
         return images
 
-    def __load_image_rows__(self,images,def_width=500,def_height=375):
+    def __load_image_rows__(self,images,def_width=500,def_height=375,with_reshape=True):
         image_rows = []
 
         for image in images:
@@ -67,7 +69,8 @@ class ImageHandler():
 
             image_classif = Image(image[0], image[1], image[1] + " pictures", image_arr, True if image[2] is 1 else False)  # 1 is the label title
 
-            image_arr = image_arr.reshape(-1)  # this FLATTENGS the width x height x 3 image!
+            if with_reshape:
+                image_arr = image_arr.reshape(-1)  # this FLATTENGS the width x height x 3 image!
 
             train_instance = ImageTrainRow(image_arr, image[2], image_classif)
             image_rows.append(train_instance)
@@ -108,6 +111,26 @@ class ImageHandler():
         # images have to go out READY to be consumed from the neural network
         #tain_x.shape=(widthXrowsX3,m)
         #train_y.shape(1,m)
+        return  train_x,train_y,image_idx
+
+
+    def create_non_vect_sets(self,true_path,false_path,true_label,image_type=".jpg"):
+        true_images = self.__find_inner_files__(true_path, image_type)
+        false_images = self.__find_inner_files__(false_path, image_type)
+
+        images = self.__load_images__(true_images, false_images, true_label, 0, sys.maxsize)
+
+        image_rows = self.__load_image_rows__(images,with_reshape=False)
+
+        LightLogger.do_log("Reshuffling {} instances".format(len(image_rows)))
+        random.shuffle(image_rows)
+
+        LightLogger.do_log("Properly vectorizing all the images")
+        train_x, train_y, image_idx = self.__vectorize_images__(image_rows)
+
+        LightLogger.do_log("Normalizing all the train_Xs")
+        train_x = train_x / 255
+
         return  train_x,train_y,image_idx
 
 
